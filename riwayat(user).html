@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="id">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Riwayat Pemesanan</title>
+	<style>
+		:root{--green:#3C8322}
+		html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--green)}
+		.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+		.card{width:100%;max-width:1100px;background:#fff;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.12);padding:20px}
+		h1{margin:0 0 8px;color:#0b3b03}
+		.filters{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+		.filters input,.filters select{padding:10px;border:1px solid #ddd;border-radius:8px}
+		.list{margin-top:16px;border-top:1px solid #eee}
+		.record{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f3f3f3}
+		.record img{width:90px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e6e6e6}
+		.meta{flex:1}
+		.meta h3{margin:0;font-size:16px}
+		.meta p{margin:4px 0;color:#666;font-size:13px}
+		.status{padding:6px 10px;border-radius:8px;font-weight:700}
+		.status.completed{background:#e6f8e9;color:#0b3b03}
+		.status.pending{background:#fff4e6;color:#b76e00}
+		.empty{padding:40px;text-align:center;color:#666}
+		.illustration{width:100%;border-radius:12px;border:2px solid #949494;margin-top:12px}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<div class="card" role="main" aria-labelledby="history-title">
+			<h1 id="history-title">Riwayat Pemesanan</h1>
+			<p style="margin:0;color:#355d2a">Lihat riwayat peminjaman atau pemesanan barang Anda.</p>
+
+			<div class="filters">
+				<input type="search" id="q" placeholder="Cari..." />
+				<select id="filter-status">
+					<option value="all">Semua Status</option>
+					<option value="completed">Selesai</option>
+					<option value="pending">Dalam Proses</option>
+				</select>
+				<select id="filter-type">
+					<option value="all">Semua Kategori</option>
+					<option value="elektronik">Elektronik</option>
+					<option value="furniture">Furniture</option>
+				</select>
+			</div>
+
+			<div class="list" id="list">
+				<!-- Example records -->
+				<div class="record">
+					<img src="https://via.placeholder.com/400x300?text=Proyektor" alt="Proyektor" />
+					<div class="meta">
+						<h3>Proyektor Panasonic</h3>
+						<p>Dipinjam: 12 Jun 2026 — Dikembalikan: 14 Jun 2026</p>
+						<p>Jumlah: 1 · Keterangan: Untuk presentasi</p>
+					</div>
+					<div><div class="status completed">Selesai</div></div>
+				</div>
+
+				<div class="record">
+					<img src="https://via.placeholder.com/400x300?text=Laptop" alt="Laptop" />
+					<div class="meta">
+						<h3>Laptop Dell</h3>
+						<p>Dipinjam: 15 Jun 2026 — Belum dikembalikan</p>
+						<p>Jumlah: 1 · Keterangan: Tugas lab</p>
+					</div>
+					<div><div class="status pending">Dalam Proses</div></div>
+				</div>
+
+			</div>
+
+			<!-- <img class="illustration" src="https://api.builder.io/api/v1/image/assets/TEMP/5c36e7bc36cb5b2c102bbdaaa645078e0c08b138?width=1303" alt="Ilustrasi Riwayat Pemesanan" /> -->
+
+		</div>
+	</div>
+
+	<script>
+		// Simple client-side filtering example
+		const listEl = document.getElementById('list');
+		const q = document.getElementById('q');
+		const status = document.getElementById('filter-status');
+		const type = document.getElementById('filter-type');
+
+		function applyFilter(){
+			const term = q.value.toLowerCase();
+			const st = status.value;
+			const items = Array.from(listEl.querySelectorAll('.record'));
+			items.forEach(it => {
+				const text = it.innerText.toLowerCase();
+				let visible = true;
+				if(term && !text.includes(term)) visible = false;
+				if(st !== 'all'){
+					if(st === 'completed' && !it.querySelector('.status').classList.contains('completed')) visible = false;
+					if(st === 'pending' && !it.querySelector('.status').classList.contains('pending')) visible = false;
+				}
+				it.style.display = visible ? '' : 'none';
+			});
+		}
+
+		q.addEventListener('input', applyFilter);
+		status.addEventListener('change', applyFilter);
+		type.addEventListener('change', applyFilter);
+	</script>
+</body>
+</html>
+
