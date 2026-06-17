@@ -21,7 +21,7 @@ public class Transaksi implements Printable {
         this.tanggalPinjam = tanggalPinjam;
         this.tanggalKembali = tanggalKembali;
         this.status = status;
-        this.totalBiaya = hitungBiaya();
+        this.totalBiaya = barang.getHargaSewa() * getDurasi();
     }
 
     public Transaksi(String idTransaksi, User user, Barang barang, String tanggalPinjam, String tanggalKembali, String status) throws ParseException {

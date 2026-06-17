@@ -1,8 +1,5 @@
 package com.example.backend;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpServer;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -18,9 +15,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
+
 public class App {
     private static final int PORT = 8080;
-    private static final Path WEB_ROOT = Paths.get("..", "web").toAbsolutePath().normalize();
+    private static final Path WEB_ROOT = locateWebRoot();
 
     public static void main(String[] args) throws Exception {
         DatabaseHelper db = new DatabaseHelper();
@@ -264,8 +264,8 @@ public class App {
         if (value == null) {
             return "null";
         }
-        if (value instanceof String) {
-            return quote((String) value);
+        if (value instanceof String string) {
+            return quote(string);
         }
         if (value instanceof Number || value instanceof Boolean) {
             return value.toString();
@@ -312,5 +312,20 @@ public class App {
 
     private static void sendMethodNotAllowed(HttpExchange exchange) throws IOException {
         sendJson(exchange, 405, Map.of("success", false, "message", "Metode tidak diizinkan."));
+    }
+
+    private static Path locateWebRoot() {
+        Path current = Paths.get("").toAbsolutePath().normalize();
+        for (int i = 0; i < 5; i++) {
+            Path candidate = current.resolve("web").normalize();
+            if (Files.isDirectory(candidate)) {
+                return candidate;
+            }
+            current = current.getParent();
+            if (current == null) {
+                break;
+            }
+        }
+        return Paths.get("web").toAbsolutePath().normalize();
     }
 }
