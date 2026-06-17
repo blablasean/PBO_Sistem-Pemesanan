@@ -7,30 +7,33 @@
 	<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-	<div class="wrap">
-		<div class="panel" role="main" aria-labelledby="page-title">
-			<aside class="sidebar">
-				<h1 id="page-title">Peminjaman Barang</h1>
-				<p class="lead">Pilih barang yang ingin dipinjam dan ajukan permintaan secara cepat.</p>
-				<div class="form-group">
-					<label for="filter-category">Filter Kategori</label>
-					<select id="filter-category" class="select" aria-label="Filter kategori">
-						<option value="all">Semua Kategori</option>
-						<option value="Elektronik">Elektronik</option>
-						<option value="Furniture">Furniture</option>
-						<option value="Alat Tulis">Alat Tulis</option>
-					</select>
-				</div>
-				<div class="form-group">
-					<label for="filter-status">Status</label>
-					<select id="filter-status" class="select" aria-label="Filter status">
-						<option value="all">Semua</option>
-						<option value="Tersedia">Tersedia</option>
-						<option value="Dipinjam">Dipinjam</option>
-					</select>
-				</div>
-			</aside>
-            <section class="content">
+    <main class="page-wrapper">
+        <article class="page-card" role="main" aria-labelledby="page-title">
+            <header>
+                <h1 id="page-title" class="page-title">Peminjaman Barang</h1>
+                <p class="lead">Pilih barang yang ingin dipinjam dan ajukan permintaan secara cepat.</p>
+            </header>
+            <div class="page-grid">
+                <aside class="panel">
+                    <h2 class="section-title">Filter Barang</h2>
+                    <div class="form-group">
+                        <label for="filter-category">Filter Kategori</label>
+                        <select id="filter-category" class="select" aria-label="Filter kategori">
+                            <option value="all">Semua Kategori</option>
+                            <option value="Kamera">Kamera</option>
+                            <option value="Motor">Motor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-status">Status</label>
+                        <select id="filter-status" class="select" aria-label="Filter status">
+                            <option value="all">Semua</option>
+                            <option value="Tersedia">Tersedia</option>
+                            <option value="Dipinjam">Dipinjam</option>
+                        </select>
+                    </div>
+                </aside>
+                <section class="panel">
                 <div class="controls">
                     <input id="search-items" class="input" type="search" placeholder="Cari barang..." aria-label="Cari barang" />
                     <select id="sort-items" class="select" aria-label="Urutkan">
@@ -43,16 +46,6 @@
                 </div>
                 <div class="items" id="items"></div>
 
-                    <!-- History modal -->
-                    <div id="history-modal" class="modal" aria-hidden="true">
-                        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="history-modal-title">
-                            <button id="close-history-button" class="modal-close" aria-label="Tutup">×</button>
-                            <h2 id="history-modal-title">Riwayat Peminjaman</h2>
-                            <div id="history-container"><div class="modal-loading">Memuat...</div></div>
-                        </div>
-                    </div>
-
-
                     <script>
                         let items = [];
                         const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
@@ -61,8 +54,6 @@
                         const categoryFilter = document.getElementById('filter-category');
                         const statusFilter = document.getElementById('filter-status');
                         const sortSelect = document.getElementById('sort-items');
-                        const historyModal = document.getElementById('history-modal');
-                        const historyContainer = document.getElementById('history-container');
 
                         if (!currentUser) {
                             window.location.href = 'login.html';
@@ -123,9 +114,11 @@
                                     <h3>${item.name}</h3>
                                     <p>Kategori: ${item.category}</p>
                                     <p>Status: ${item.status}</p>
-                                    <button type="button" class="btn btn-primary" ${item.status !== 'Tersedia' ? 'disabled' : ''} data-id="${item.id}">
-                                        ${item.status === 'Tersedia' ? 'Ajukan Peminjaman' : 'Tidak Tersedia'}
-                                    </button>
+                                    <div class="item-actions">
+                                        <button type="button" class="btn btn-primary" style="width: 100%;" ${item.status !== 'Tersedia' ? 'disabled' : ''} data-id="${item.id}">
+                                            ${item.status === 'Tersedia' ? 'Ajukan Peminjaman' : 'Tidak Tersedia'}
+                                        </button>
+                                    </div>
                                 `;
                                 const actionButton = card.querySelector('button');
                                 actionButton.addEventListener('click', () => openBorrowForm(item.id));
@@ -138,64 +131,15 @@
                             window.location.href = 'formpeminjaman(user).html';
                         }
 
-                        async function showHistory() {
-                            historyContainer.innerHTML = '<div class="empty-state">Memuat riwayat...</div>';
-                            historyModal.classList.add('active');
-                            try {
-                                const response = await fetch('/api/riwayat', { cache: 'no-store' });
-                                if (!response.ok) throw new Error('Gagal memuat riwayat');
-                                const history = await response.json();
-                                renderHistory(history.filter(rec => String(rec.user_id) === String(currentUser.id)));
-                            } catch (error) {
-                                console.error(error);
-                                historyContainer.innerHTML = '<div class="empty-state">Gagal memuat riwayat. Coba lagi nanti.</div>';
-                            }
-                        }
-
-                        function renderHistory(records) {
-                            historyContainer.innerHTML = '';
-                            if (!records.length) {
-                                historyContainer.innerHTML = '<div class="empty-state">Belum ada riwayat peminjaman.</div>';
-                                return;
-                            }
-                            const list = document.createElement('div');
-                            list.className = 'items';
-                            records.forEach(rec => {
-                                const card = document.createElement('div');
-                                card.className = 'item';
-                                const imageSrc = rec.image_data || rec.image_url || 'https://via.placeholder.com/400x300?text=Barang';
-                                const statusClass = rec.status && rec.status.toLowerCase().includes('selesai')
-                                    ? 'status-completed' : 'status-pending';
-                                card.innerHTML = `
-                                    <img src="${imageSrc}" alt="${rec.barang_name || 'Barang'}" />
-                                    <h3>${rec.barang_name || 'Barang'}</h3>
-                                    <p>Dipinjam: ${rec.borrow_date || '-'} — Dikembalikan: ${rec.return_date || 'Belum kembali'}</p>
-                                    <p>Jumlah: ${rec.quantity || 1} · Keterangan: ${rec.note || '-'}</p>
-                                    <span class="status-pill ${statusClass}">${rec.status || 'Dalam Proses'}</span>
-                                `;
-                                list.appendChild(card);
-                            });
-                            historyContainer.appendChild(list);
-                        }
-
-                        function closeHistory() {
-                            historyModal.classList.remove('active');
-                        }
-
                         function logout() {
                             localStorage.removeItem('currentUser');
                             localStorage.removeItem('selectedItemId');
                             window.location.href = 'login.html';
                         }
 
-                        document.addEventListener('click', event => {
-                            if (event.target === historyModal) {
-                                closeHistory();
-                            }
+                        document.getElementById('show-history-button').addEventListener('click', () => {
+                            window.location.href = 'riwayat(user).html';
                         });
-
-                        document.getElementById('close-history-button').addEventListener('click', closeHistory);
-                        document.getElementById('show-history-button').addEventListener('click', showHistory);
                         document.getElementById('logout-button').addEventListener('click', logout);
                         searchInput.addEventListener('input', renderItems);
                         categoryFilter.addEventListener('change', renderItems);
@@ -203,9 +147,9 @@
                         sortSelect.addEventListener('change', renderItems);
                         window.addEventListener('DOMContentLoaded', loadItems);
                     </script>
-                </div>
+                </section>
             </div>
-
+        </article>
+    </main>
 </body>
 </html>
-

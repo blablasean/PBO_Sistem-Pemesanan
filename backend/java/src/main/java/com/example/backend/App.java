@@ -43,11 +43,14 @@ public class App {
     private static void seedData(DatabaseHelper db) throws SQLException {
         // Hanya masukkan data awal jika admin belum ada di database
         if (db.getUserByEmail("admin@toko.com") == null) {
+            System.out.println("Melakukan seeding data awal ke database...");
             db.insertUser("u1", "Mahasiswa Instansi", "user@instansi.com", "Mahasiswa", "12345678");
             db.insertUser("u2", "Admin Toko", "admin@toko.com", "Admin", "admin123");
             db.insertUser("u3", "Admin Telkom University", "admin@telkomuniversity.ac.id", "Admin", "123456");
-            db.insertBarang("b1", "Kamera Sony", "Tersedia", "Elektronik", 3500000, "https://via.placeholder.com/400x300?text=Kamera", null);
-            db.insertBarang("b2", "Meja Lipat", "Tersedia", "Furniture", 250000, "https://via.placeholder.com/400x300?text=Meja", null);
+            
+            // Barang ini hanya akan dimasukkan sekali saat database baru dibuat
+            db.insertBarang("b1", "Kamera Sony A7III", "Tersedia", "Kamera", 350000, "https://via.placeholder.com/400x300?text=Kamera", null);
+            db.insertBarang("b2", "Yamaha NMAX 155", "Tersedia", "Motor", 150000, "https://via.placeholder.com/400x300?text=Motor", null);
         }
     }
 

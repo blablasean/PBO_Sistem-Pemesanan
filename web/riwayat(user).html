@@ -13,23 +13,21 @@
                 <h1 id="history-title" class="page-title">Riwayat Pemesanan</h1>
                 <p class="lead">Lihat riwayat peminjaman atau pemesanan barang Anda.</p>
             </header>
-            <div class="controls">
-                <button type="button" class="btn btn-danger" id="logout-button">Logout</button>
-            </div>
-            <div class="filters">
+            <div class="controls" style="margin-bottom: 24px;">
                 <input type="search" id="q" class="input" placeholder="Cari..." />
-                <select id="filter-status" class="select">
+                <select id="filter-status" class="select" style="width: auto;">
                     <option value="all">Semua Status</option>
                     <option value="completed">Selesai</option>
                     <option value="pending">Dalam Proses</option>
                 </select>
-                <select id="filter-type" class="select">
+                <select id="filter-type" class="select" style="width: auto;">
                     <option value="all">Semua Kategori</option>
-                    <option value="elektronik">Elektronik</option>
-                    <option value="furniture">Furniture</option>
+                    <option value="kamera">Kamera</option>
+                    <option value="motor">Motor</option>
                 </select>
+                <button type="button" class="btn btn-danger" id="logout-button">Logout</button>
             </div>
-            <div class="page-grid" id="list">
+            <div class="items" id="list">
                 <div class="empty-state">Memuat riwayat...</div>
             </div>
         </article>
@@ -66,19 +64,20 @@
                 return;
             }
             records.forEach(rec => {
-                const item = document.createElement('div');
-                item.className = 'record';
+                const card = document.createElement('div');
+                card.className = 'item';
                 const statusClass = rec.status && rec.status.toLowerCase().includes('selesai') ? 'status-completed' : 'status-pending';
-                item.innerHTML = `
+                card.innerHTML = `
                     <img src="${rec.image_data || rec.image_url || 'https://via.placeholder.com/400x300?text=Barang'}" alt="${rec.barang_name || 'Barang'}" />
-                    <div class="meta">
-                        <h3>${rec.barang_name || 'Barang'}</h3>
-                        <p>Dipinjam: ${rec.borrow_date || '-'} — Dikembalikan: ${rec.return_date || 'Belum kembali'}</p>
-                        <p>Jumlah: ${rec.quantity || 1} · Keterangan: ${rec.note || '-'}</p>
+                    <h3>${rec.barang_name || 'Barang'}</h3>
+                    <p>Dipinjam: ${rec.borrow_date || '-'}</p>
+                    <p>Dikembalikan: ${rec.return_date || 'Belum kembali'}</p>
+                    <p>Jml: ${rec.quantity || 1} · Ket: ${rec.note || '-'}</p>
+                    <div class="item-actions">
+                        <span class="status-pill ${statusClass}">${rec.status || 'Dalam Proses'}</span>
                     </div>
-                    <div><span class="status-pill ${statusClass}">${rec.status || 'Dalam Proses'}</span></div>
                 `;
-                listEl.appendChild(item);
+                listEl.appendChild(card);
             });
             applyFilter();
         }
@@ -92,7 +91,7 @@
             const term = q.value.toLowerCase();
             const st = status.value;
             const ty = type.value;
-            Array.from(listEl.querySelectorAll('.record')).forEach(it => {
+            Array.from(listEl.querySelectorAll('.item')).forEach(it => {
                 const text = it.innerText.toLowerCase();
                 let visible = true;
                 if (term && !text.includes(term)) visible = false;
@@ -116,4 +115,3 @@
     </script>
 </body>
 </html>
-
