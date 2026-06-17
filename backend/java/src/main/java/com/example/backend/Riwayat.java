@@ -5,20 +5,24 @@ import java.util.Collections;
 import java.util.List;
 
 public class Riwayat implements Printable {
-    private final List<Transaksi> transaksiList = new ArrayList<>();
+    private final List<Transaksi> daftarTransaksi = new ArrayList<>();
 
-    public void addTransaksi(Transaksi transaksi) {
-        transaksiList.add(transaksi);
+    public void tambahTransaksi(Transaksi transaksi) {
+        daftarTransaksi.add(transaksi);
     }
 
-    public List<Transaksi> getTransaksiList() {
-        return Collections.unmodifiableList(transaksiList);
+    public List<Transaksi> getDaftarTransaksi() {
+        return Collections.unmodifiableList(daftarTransaksi);
+    }
+
+    public String printInfo() {
+        return printDetails();
     }
 
     @Override
     public String printDetails() {
         StringBuilder builder = new StringBuilder("Riwayat peminjaman:\n");
-        for (Transaksi transaksi : transaksiList) {
+        for (Transaksi transaksi : daftarTransaksi) {
             builder.append(transaksi.printDetails()).append("\n");
         }
         return builder.toString();
