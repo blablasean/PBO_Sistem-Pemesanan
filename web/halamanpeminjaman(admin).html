@@ -161,14 +161,13 @@ function renderItems() {
         const card = document.createElement('div');
         card.className = 'item';
         const imageSrc = item.image_data || item.image_url || 'https://via.placeholder.com/400x300?text=Barang';
-        const borrowDisabled = item.status !== 'Tersedia' ? 'disabled' : '';
         card.innerHTML = `
             <img src="${imageSrc}" alt="${item.name}" />
             <h3>${item.name}</h3>
             <p>Kategori: ${item.category}</p>
             <p>Status: ${item.status}</p>
             <div class="item-actions">
-                <button type="button" class="btn btn-primary" data-action="toggleBorrow" data-id="${item.id}" ${borrowDisabled}>${item.status === 'Tersedia' ? 'Pinjam' : 'Tidak Tersedia'}</button>
+                <span class="status-label ${item.status === 'Tersedia' ? 'status-available' : 'status-borrowed'}">${item.status}</span>
                 <button type="button" class="btn btn-secondary" data-action="edit" data-id="${item.id}">Edit</button>
                 <button type="button" class="btn btn-danger" data-action="delete" data-id="${item.id}">Hapus</button>
             </div>
@@ -248,6 +247,7 @@ async function deleteItem(id) {
 
 let editingItemId = null;
 const editModal = document.getElementById('edit-modal');
+const editDialog = editModal.querySelector('.modal');
 const editForm = document.getElementById('edit-item-form');
 const editNameInput = document.getElementById('edit-item-name');
 const editCategoryInput = document.getElementById('edit-item-category');
@@ -264,6 +264,7 @@ function openEditModal(id) {
     editStatusInput.value = item.status;
     editPhotoInput.value = '';
     editModal.classList.add('active');
+    editDialog.classList.add('active');
     editModal.setAttribute('aria-hidden', 'false');
     editNameInput.focus();
 }
@@ -271,6 +272,7 @@ function openEditModal(id) {
 function closeEditModal() {
     editingItemId = null;
     editModal.classList.remove('active');
+    editDialog.classList.remove('active');
     editModal.setAttribute('aria-hidden', 'true');
 }
 

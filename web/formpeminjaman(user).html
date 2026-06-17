@@ -16,34 +16,36 @@
                 </header>
                 <button type="button" class="btn btn-danger" id="logout-button">Logout</button>
                 <section id="user-info" class="info-card"></section>
-                <div class="form-group">
-                    <label for="barang">Pilih Barang</label>
-                    <select id="barang" name="barang" class="select" required>
-                        <option value="">-- Pilih barang yang tersedia --</option>
-                    </select>
-                </div>
-                <div class="section-row">
+                <form id="borrow-form" class="request-form">
                     <div class="form-group">
-                        <label for="tanggal_pinjam">Tanggal Pinjam</label>
-                        <input id="tanggal_pinjam" name="tanggal_pinjam" class="input" type="date" required />
+                        <label for="barang">Pilih Barang</label>
+                        <select id="barang" name="barang" class="select" required>
+                            <option value="">-- Pilih barang yang tersedia --</option>
+                        </select>
+                    </div>
+                    <div class="section-row">
+                        <div class="form-group">
+                            <label for="tanggal_pinjam">Tanggal Pinjam</label>
+                            <input id="tanggal_pinjam" name="tanggal_pinjam" class="input" type="date" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="tanggal_kembali">Tanggal Kembali</label>
+                            <input id="tanggal_kembali" name="tanggal_kembali" class="input" type="date" required />
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="tanggal_kembali">Tanggal Kembali</label>
-                        <input id="tanggal_kembali" name="tanggal_kembali" class="input" type="date" required />
+                        <label for="jumlah">Jumlah</label>
+                        <input id="jumlah" name="jumlah" class="input" type="number" min="1" value="1" required />
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="jumlah">Jumlah</label>
-                    <input id="jumlah" name="jumlah" class="input" type="number" min="1" value="1" required />
-                </div>
-                <div class="form-group">
-                    <label for="alasan">Keterangan / Tujuan</label>
-                    <textarea id="alasan" name="alasan" class="textarea" placeholder="Contoh: Peminjaman untuk tugas instansi" required></textarea>
-                </div>
-                <div class="section-row">
-                    <button type="submit" class="btn btn-primary" form="borrow-form">Kirim Permintaan</button>
-                    <button type="button" class="btn btn-secondary" id="cancel-button">Kembali</button>
-                </div>
+                    <div class="form-group">
+                        <label for="alasan">Keterangan / Tujuan</label>
+                        <textarea id="alasan" name="alasan" class="textarea" placeholder="Contoh: Peminjaman untuk tugas instansi" required></textarea>
+                    </div>
+                    <div class="section-row">
+                        <button type="submit" class="btn btn-primary">Kirim Permintaan</button>
+                        <button type="button" class="btn btn-secondary" id="cancel-button">Kembali</button>
+                    </div>
+                </form>
             </section>
         </article>
     </main>

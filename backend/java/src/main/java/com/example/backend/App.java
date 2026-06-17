@@ -41,11 +41,14 @@ public class App {
     }
 
     private static void seedData(DatabaseHelper db) throws SQLException {
-        db.insertUser("u1", "Mahasiswa Instansi", "user@instansi.com", "Mahasiswa", "12345678");
-        db.insertUser("u2", "Admin Toko", "admin@toko.com", "Admin", "admin123");
-        db.insertUser("u3", "Admin Telkom University", "admin@telkomuniversity.ac.id", "Admin", "123456");
-        db.insertBarang("b1", "Kamera Sony", "Tersedia", "Elektronik", 3500000, "https://via.placeholder.com/400x300?text=Kamera", null);
-        db.insertBarang("b2", "Meja Lipat", "Tersedia", "Furniture", 250000, "https://via.placeholder.com/400x300?text=Meja", null);
+        // Hanya masukkan data awal jika admin belum ada di database
+        if (db.getUserByEmail("admin@toko.com") == null) {
+            db.insertUser("u1", "Mahasiswa Instansi", "user@instansi.com", "Mahasiswa", "12345678");
+            db.insertUser("u2", "Admin Toko", "admin@toko.com", "Admin", "admin123");
+            db.insertUser("u3", "Admin Telkom University", "admin@telkomuniversity.ac.id", "Admin", "123456");
+            db.insertBarang("b1", "Kamera Sony", "Tersedia", "Elektronik", 3500000, "https://via.placeholder.com/400x300?text=Kamera", null);
+            db.insertBarang("b2", "Meja Lipat", "Tersedia", "Furniture", 250000, "https://via.placeholder.com/400x300?text=Meja", null);
+        }
     }
 
     private static void handleStatic(HttpExchange exchange) throws IOException {
@@ -182,6 +185,7 @@ public class App {
                 return;
             }
             if (id != null && method.equalsIgnoreCase("DELETE")) {
+                db.deleteTransaksiByBarangId(id);
                 db.deleteBarang(id);
                 sendJson(exchange, 200, Map.of("success", true, "message", "Barang dihapus."));
                 return;

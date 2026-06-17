@@ -186,6 +186,14 @@ public class DatabaseHelper {
         }
     }
 
+    public void deleteTransaksiByBarangId(String barangId) throws SQLException {
+        String sql = "DELETE FROM transaksi WHERE barang_id = ?";
+        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, barangId);
+            statement.executeUpdate();
+        }
+    }
+
     public void deleteBarang(String id) throws SQLException {
         String sql = "DELETE FROM barang WHERE id = ?";
         try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
