@@ -1,4 +1,4 @@
-package backend.java.src.main.java.com.example.backend;
+package com.example.backend;
 
 public class Admin extends User {
     private final String unit;

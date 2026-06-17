@@ -1,15 +1,31 @@
-package backend.java.src.main.java.com.example.backend;
+package com.example.backend;
 
 public class Motor extends Barang {
     private final int cc;
+    private final String tipe;
+
+    public Motor(String id, String nama, double harga, int cc, String tipe) {
+        super(id, nama, "Unknown", harga, "Tersedia");
+        this.cc = cc;
+        this.tipe = tipe;
+    }
 
     public Motor(String id, String nama, double harga, int cc) {
-        super(id, nama, harga);
+        this(id, nama, harga, cc, "Standard");
+    }
+
+    public Motor(String id, String nama, String merk, double hargaSewa, String statusPeminjaman, int cc, String tipe) {
+        super(id, nama, merk, hargaSewa, statusPeminjaman);
         this.cc = cc;
+        this.tipe = tipe;
     }
 
     public int getCc() {
         return cc;
+    }
+
+    public String getTipe() {
+        return tipe;
     }
 
     @Override
@@ -18,7 +34,12 @@ public class Motor extends Barang {
     }
 
     @Override
+    public String printInfo() {
+        return String.format("%s, cc=%d, tipe=%s", super.printDetails(), cc, tipe);
+    }
+
+    @Override
     public String printDetails() {
-        return String.format("%s, cc=%d", super.printDetails(), cc);
+        return printInfo();
     }
 }

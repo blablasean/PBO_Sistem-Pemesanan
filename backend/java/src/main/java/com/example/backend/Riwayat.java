@@ -1,4 +1,4 @@
-package backend.java.src.main.java.com.example.backend;
+package com.example.backend;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,6 +9,10 @@ public class Riwayat implements Printable {
 
     public void tambahTransaksi(Transaksi transaksi) {
         daftarTransaksi.add(transaksi);
+    }
+
+    public void addTransaksi(Transaksi transaksi) {
+        tambahTransaksi(transaksi);
     }
 
     public List<Transaksi> getDaftarTransaksi() {

@@ -1,15 +1,31 @@
-package backend.java.src.main.java.com.example.backend;
+package com.example.backend;
 
 public class Kamera extends Barang {
     private final double megapixel;
+    private final String resolusi;
+
+    public Kamera(String id, String nama, double harga, double megapixel, String resolusi) {
+        super(id, nama, "Unknown", harga, "Tersedia");
+        this.megapixel = megapixel;
+        this.resolusi = resolusi;
+    }
 
     public Kamera(String id, String nama, double harga, double megapixel) {
-        super(id, nama, harga);
+        this(id, nama, harga, megapixel, "Unknown");
+    }
+
+    public Kamera(String id, String nama, String merk, double hargaSewa, String statusPeminjaman, double megapixel, String resolusi) {
+        super(id, nama, merk, hargaSewa, statusPeminjaman);
         this.megapixel = megapixel;
+        this.resolusi = resolusi;
     }
 
     public double getMegapixel() {
         return megapixel;
+    }
+
+    public String getResolusi() {
+        return resolusi;
     }
 
     @Override
@@ -18,7 +34,12 @@ public class Kamera extends Barang {
     }
 
     @Override
+    public String printInfo() {
+        return String.format("%s, megapixel=%.1f, resolusi=%s", super.printDetails(), megapixel, resolusi);
+    }
+
+    @Override
     public String printDetails() {
-        return String.format("%s, megapixel=%.1f", super.printDetails(), megapixel);
+        return printInfo();
     }
 }

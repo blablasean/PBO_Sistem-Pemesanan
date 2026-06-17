@@ -1,4 +1,4 @@
-package backend.java.src.main.java.com.example.backend;
+package com.example.backend;
 
 public class Mahasiswa extends User {
     private final String nim;
@@ -17,11 +17,11 @@ public class Mahasiswa extends User {
     }
 
     public void kembalikanBarang(Transaksi t) {
-        System.out.printf("%s mengembalikan barang: %s (Transaksi ID=%s)%n", getNama(), t.getBarang().getNama(), t.getId());
+        System.out.printf("%s mengembalikan barang: %s (Transaksi ID=%s)%n", getNama(), t.getBarang().getNama(), t.getIdTransaksi());
     }
 
     public void bayarTransaksi(Transaksi t) {
-        System.out.printf("%s membayar transaksi: %s dengan barang %s%n", getNama(), t.getId(), t.getBarang().getNama());
+        System.out.printf("%s membayar transaksi: %s dengan barang %s%n", getNama(), t.getIdTransaksi(), t.getBarang().getNama());
     }
 
     @Override
