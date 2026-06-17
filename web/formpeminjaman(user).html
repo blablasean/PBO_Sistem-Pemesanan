@@ -27,31 +27,20 @@
 <body>
 	<div class="wrap">
 		<div class="card" role="main" aria-labelledby="form-title">
-			<form class="form" id="borrow-form" onsubmit="handleSubmit(event)">
-				<h1 id="form-title">Form Peminjaman</h1>
-				<p class="note">Isi data berikut untuk mengajukan peminjaman barang.</p>
-
-				<label for="nama">Nama Peminjam</label>
-				<input id="nama" name="nama" type="text" placeholder="Nama lengkap" required />
-
-				<div class="row">
-					<div>
-						<label for="nim">NIM / ID</label>
-						<input id="nim" name="nim" type="text" placeholder="12345678" required />
-					</div>
-					<div>
-						<label for="telepon">Telepon</label>
-						<input id="telepon" name="telepon" type="tel" placeholder="0812xxxx" />
-					</div>
+			<form class="form" id="borrow-form">
+				<div class="section">
+					<h1 id="form-title">Ajukan Peminjaman</h1>
+					<p class="note">Pilih barang yang tersedia dan kirim permintaan peminjaman.</p>
 				</div>
 
-				<label for="barang">Barang</label>
-				<select id="barang" name="barang" required>
-					<option value="">-- Pilih barang --</option>
-					<option value="proyektor">Proyektor Panasonic</option>
-					<option value="laptop">Laptop Dell</option>
-					<option value="meja">Meja Lipat</option>
-				</select>
+				<div class="info-box" id="user-info"></div>
+
+				<div class="section">
+					<label for="barang">Pilih Barang</label>
+					<select id="barang" name="barang" required>
+						<option value="">-- Pilih barang yang tersedia --</option>
+					</select>
+				</div>
 
 				<div class="row">
 					<div>
@@ -64,15 +53,19 @@
 					</div>
 				</div>
 
-				<label for="jumlah">Jumlah</label>
-				<input id="jumlah" name="jumlah" type="number" min="1" value="1" required />
+				<div class="section">
+					<label for="jumlah">Jumlah</label>
+					<input id="jumlah" name="jumlah" type="number" min="1" value="1" required />
+				</div>
 
-				<label for="alasan">Alasan Peminjaman</label>
-				<textarea id="alasan" name="alasan" placeholder="Jelaskan kebutuhan peminjaman..." required></textarea>
+				<div class="section">
+					<label for="alasan">Keterangan / Tujuan</label>
+					<textarea id="alasan" name="alasan" placeholder="Contoh: Peminjaman untuk tugas instansi" required></textarea>
+				</div>
 
 				<div class="actions">
-					<button type="submit">Ajukan Peminjaman</button>
-					<button type="button" class="secondary" onclick="document.getElementById('borrow-form').reset()">Reset</button>
+					<button type="submit">Kirim Permintaan</button>
+					<button type="button" class="secondary" onclick="window.location.href='halamanpeminjaman(user).html'">Kembali</button>
 				</div>
 			</form>
 
@@ -88,34 +81,41 @@
             const select = document.getElementById('barang');
             try {
                 const response = await fetch('/api/barang');
-                if (!response.ok) {
-                    throw new Error('Gagal memuat daftar barang');
-                }
+                if (!response.ok) throw new Error('Gagal memuat daftar barang');
                 const data = await response.json();
-                select.innerHTML = '<option value="">-- Pilih barang --</option>';
-                data.forEach(item => {
-                    if (item.status && item.status.toLowerCase() === 'tersedia') {
+                select.innerHTML = '<option value="">-- Pilih barang yang tersedia --</option>';
+                data.filter(item => item.status && item.status.toLowerCase() === 'tersedia')
+                    .forEach(item => {
                         const option = document.createElement('option');
                         option.value = item.id;
-                        option.textContent = item.name + ' (' + item.category + ')';
+                        option.textContent = `${item.name} (${item.category})`;
                         select.appendChild(option);
-                    }
-                });
+                    });
             } catch (error) {
                 console.error(error);
-                select.innerHTML = '<option value="">Gagal memuat barang</option>';
+                select.innerHTML = '<option value="">Tidak dapat memuat barang</option>';
             }
         }
 
-        async function handleSubmit(e){
-            e.preventDefault();
+        function showCurrentUser(user) {
+            const info = document.getElementById('user-info');
+            info.innerHTML = `
+                <p><strong>Peminjam:</strong> ${user.name}</p>
+                <p><strong>Peran:</strong> ${user.role}</p>
+                <p><strong>ID Akun:</strong> ${user.id}</p>
+            `;
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
             const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
             if (!currentUser) {
                 alert('Silakan login terlebih dahulu.');
                 window.location.href = 'login.html';
                 return;
             }
-            const data = Object.fromEntries(new FormData(e.target).entries());
+            const form = event.currentTarget;
+            const data = Object.fromEntries(new FormData(form).entries());
             const payload = {
                 userId: currentUser.id,
                 barang_id: data.barang,
@@ -133,8 +133,9 @@
                 });
                 const result = await response.json();
                 if (response.ok && result.success) {
-                    alert('Pengajuan peminjaman dikirim.');
-                    e.target.reset();
+                    localStorage.removeItem('selectedItemId');
+                    alert('Pengajuan peminjaman telah dikirim.');
+                    window.location.href = 'halamanpeminjaman(user).html';
                 } else {
                     alert(result.message || 'Gagal mengirim peminjaman.');
                 }
@@ -144,7 +145,24 @@
             }
         }
 
-        window.addEventListener('DOMContentLoaded', loadBarangOptions);
+        window.addEventListener('DOMContentLoaded', async () => {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            if (currentUser.role && currentUser.role.toLowerCase() === 'admin') {
+                window.location.href = 'halamanpeminjaman(admin).html';
+                return;
+            }
+            showCurrentUser(currentUser);
+            await loadBarangOptions();
+            const selectedItemId = localStorage.getItem('selectedItemId');
+            if (selectedItemId) {
+                document.getElementById('barang').value = selectedItemId;
+            }
+            document.getElementById('borrow-form').addEventListener('submit', handleSubmit);
+        });
     </script>
 </body>
 </html>

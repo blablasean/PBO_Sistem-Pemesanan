@@ -41,8 +41,8 @@ public class App {
     }
 
     private static void seedData(DatabaseHelper db) throws SQLException {
-        db.insertUser("u1", "Budi", "budi@example.com", "Mahasiswa", "12345678");
-        db.insertUser("u2", "Sari", "sari@example.com", "Admin", "admin123");
+        db.insertUser("u1", "Mahasiswa Instansi", "user@instansi.com", "Mahasiswa", "12345678");
+        db.insertUser("u2", "Admin Toko", "admin@toko.com", "Admin", "admin123");
         db.insertBarang("b1", "Kamera Sony", "Tersedia", "Elektronik", 3500000, "https://via.placeholder.com/400x300?text=Kamera");
         db.insertBarang("b2", "Meja Lipat", "Tersedia", "Furniture", 250000, "https://via.placeholder.com/400x300?text=Meja");
     }
@@ -194,14 +194,22 @@ public class App {
                 sendJson(exchange, 400, Map.of("success", false, "message", "Data peminjaman tidak lengkap."));
                 return;
             }
+            Map<String, Object> barang = db.getBarangById(barangId);
+            if (barang == null) {
+                sendJson(exchange, 404, Map.of("success", false, "message", "Barang tidak ditemukan."));
+                return;
+            }
+            if (!"Tersedia".equalsIgnoreCase(barang.get("status").toString())) {
+                sendJson(exchange, 409, Map.of("success", false, "message", "Barang sedang tidak tersedia untuk dipinjam."));
+                return;
+            }
             String transactionId = "t" + UUID.randomUUID().toString().replaceAll("[^0-9]", "").substring(0, 8);
             double totalCost = 0;
-            Map<String, Object> barang = db.getBarangById(barangId);
-            if (barang != null && barang.get("price") != null) {
+            if (barang.get("price") != null) {
                 totalCost = Double.parseDouble(barang.get("price").toString()) * quantity;
             }
             db.insertTransaksi(transactionId, userId, barangId, borrowDate, returnDate, status, quantity, note, totalCost);
-            sendJson(exchange, 201, Map.of("success", true, "message", "Peminjaman dicatat."));
+            sendJson(exchange, 201, Map.of("success", true, "message", "Peminjaman dicatat.", "barangId", barangId));
         } catch (SQLException e) {
             sendJson(exchange, 500, Map.of("success", false, "message", "Gagal menyimpan data peminjaman."));
         }
