@@ -1,115 +1,319 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width,initial-scale=1" />
-	<title>Peminjaman Barang (Admin)</title>
-	<style>
-		:root{--green:#3C8322}
-		html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--green)}
-		.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
-		.panel{width:100%;max-width:1200px;background:#fff;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.12);display:flex;gap:16px;overflow:hidden}
-		@media(max-width:980px){.panel{flex-direction:column}}
-		.list-area{flex:1;padding:20px}
-		.side{width:320px;background:#f7f7f7;padding:20px}
-		h1{margin:0 0 6px;color:#0b3b03}
-		.controls{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
-		.controls input,.controls select{padding:10px;border:1px solid #ddd;border-radius:8px}
-		table{width:100%;border-collapse:collapse;margin-top:12px}
-		th,td{padding:10px;border-bottom:1px solid #f3f3f3;text-align:left}
-		th{background:#fbfbfb}
-		.actions button{margin-right:6px;padding:6px 10px;border-radius:8px;border:none;cursor:pointer}
-		.approve{background:#0b3b03;color:#fff}
-		.deny{background:#d9534f;color:#fff}
-		.img-asset{width:100%;border-radius:12px;border:2px solid #949494}
-	</style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Peminjaman Barang (Admin)</title>
+<style>
+:root {
+--green: #3c8322;
+--dark: #0b3b03;
+--surface: #fbfbfb;
+--border: #ddd;
+--bg: #fff;
+--danger: #d9534f;
+--card-radius: 12px;
+}
+html, body {
+height: 100%;
+margin: 0;
+font-family: Inter, system-ui, Arial, sans-serif;
+background: var(--green);
+color: #1c2e16;
+}
+body {
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 24px;
+}
+.panel {
+width: 100%;
+max-width: 1200px;
+background: var(--bg);
+border-radius: 16px;
+box-shadow: 0 16px 40px rgba(0,0,0,.16);
+display: flex;
+gap: 24px;
+overflow: hidden;
+}
+@media (max-width: 920px) {
+.panel {flex-direction: column;}
+}
+.sidebar, .content {padding: 28px;}
+.sidebar {flex: 0 0 360px; background: #f7f7f7;}
+.content {flex: 1;}
+h1 {margin: 0 0 6px; font-size: 22px; color: #0b3b03;}
+.description {margin: 0; color: #355d2a; line-height: 1.6;}
+.controls {display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0;}
+.controls input, .controls select, .controls button,
+.sidebar input, .sidebar select, .sidebar button {
+width: 100%;
+padding: 10px 12px;
+border: 1px solid var(--border);
+border-radius: 8px;
+font-size: 1rem;
+}
+.controls select, .sidebar select {background: #fff; appearance: none;}
+.controls button, .sidebar button {border: none; background: var(--green); color: #fff; cursor: pointer;}
+.items {display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 16px;}
+.item {background: #fff; border: 1px solid #e6e6e6; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px;}
+.item img {width: 100%; height: 140px; object-fit: cover; border-radius: 8px;}
+.item h3 {margin: 0; font-size: 16px; color: #123;}
+.item p {margin: 0; color: #555; font-size: 13px;}
+.item-actions {display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: auto;}
+.item-actions button {padding: 10px 8px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700;}
+.item-actions button.primary {background: var(--green); color: #fff;}
+.item-actions button.edit {background: #136f33; color: #fff;}
+.item-actions button.delete {background: var(--danger); color: #fff;}
+.item-actions button[disabled] {background: #ccc; cursor: default;}
+.request-form {display: grid; gap: 12px; margin-top: 16px;}
+.request-form label {font-size: 0.95rem; font-weight: 600; color: #333;}
+.request-form input[type="text"], .request-form input[type="date"], .request-form input[type="number"], .request-form select {border: 1px solid var(--border); background: #fff;}
+.request-form button {background: var(--dark);}
+.section-title {margin: 24px 0 12px; font-size: 1rem; font-weight: 700;}
+.modal-overlay {display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); align-items: center; justify-content: center; padding: 24px; z-index: 20;}
+.modal-overlay.active {display: flex;}
+.modal {width: 100%; max-width: 520px; background: #fff; border-radius: 18px; padding: 24px 24px 18px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2); position: relative;}
+.modal h2 {margin: 0 0 14px; font-size: 1.25rem; color: #0b3b03;}
+.modal-close {position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border: none; border-radius: 50%; background: #e6e6e6; color: #1c2e16; font-size: 18px; cursor: pointer;}
+.modal-form {display: grid; gap: 12px;}
+.modal-form label {font-size: 0.95rem; font-weight: 600; color: #333;}
+.modal-form input[type="text"], .modal-form select {border: 1px solid var(--border); background: #fff;}
+.modal-form button {background: var(--dark); width: 100%;}
+</style>
 </head>
 <body>
-	<div class="wrap">
-		<div class="panel" role="main" aria-labelledby="admin-title">
-			<section class="list-area">
-				<h1 id="admin-title">Peminjaman Barang — Admin</h1>
-				<p style="margin:0;color:#355d2a">Kelola permintaan peminjaman dan inventaris.</p>
+<div class="panel" role="main" aria-labelledby="admin-title">
+<aside class="sidebar">
+<h1 id="admin-title">Admin Peminjaman</h1>
+<p class="description">Tambah barang inventaris dan kelola daftar peminjaman seperti halaman user.</p>
 
-				<div class="controls">
-					<input type="search" id="q" placeholder="Cari peminjam atau barang..." />
-					<select id="status-filter">
-						<option value="all">Semua Status</option>
-						<option value="pending">Menunggu</option>
-						<option value="approved">Disetujui</option>
-						<option value="denied">Ditolak</option>
-					</select>
-				</div>
+<div>
+<label for="filter-category">Filter Kategori</label>
+<select id="filter-category" aria-label="Filter kategori">
+<option value="all">Semua Kategori</option>
+<option value="elektronik">Elektronik</option>
+<option value="furniture">Furniture</option>
+<option value="alattulis">Alat Tulis</option>
+</select>
+</div>
+<div style="margin-top:18px">
+<label for="filter-status">Status</label>
+<select id="filter-status" aria-label="Filter status">
+<option value="all">Semua</option>
+<option value="tersedia">Tersedia</option>
+<option value="dipinjam">Dipinjam</option>
+</select>
+</div>
 
-				<table aria-label="Daftar permintaan">
-					<thead>
-						<tr><th>Nama</th><th>Barang</th><th>Tanggal</th><th>Jumlah</th><th>Status</th><th>Aksi</th></tr>
-					</thead>
-					<tbody id="requests">
-						<tr>
-							<td>Ahmad</td>
-							<td>Proyektor Panasonic</td>
-							<td>16 Jun 2026</td>
-							<td>1</td>
-							<td class="status">Menunggu</td>
-							<td class="actions">
-								<button class="approve" onclick="updateStatus(this,'approved')">Setujui</button>
-								<button class="deny" onclick="updateStatus(this,'denied')">Tolak</button>
-							</td>
-						</tr>
-						<tr>
-							<td>Siti</td>
-							<td>Meja Lipat</td>
-							<td>15 Jun 2026</td>
-							<td>2</td>
-							<td class="status">Disetujui</td>
-							<td class="actions">
-								<button class="approve" onclick="updateStatus(this,'approved')">Setujui</button>
-								<button class="deny" onclick="updateStatus(this,'denied')">Tolak</button>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</section>
+<div class="section-title">Tambah Barang Baru</div>
+<form id="add-item-form" class="request-form">
+<label for="item-name">Nama Barang</label>
+<input id="item-name" type="text" placeholder="Contoh: Kamera Sony" required />
+<label for="item-category">Kategori</label>
+<select id="item-category">
+<option value="Elektronik">Elektronik</option>
+<option value="Furniture">Furniture</option>
+<option value="Alat Tulis">Alat Tulis</option>
+</select>
+<label for="item-status">Status Barang</label>
+<select id="item-status">
+<option value="Tersedia">Tersedia</option>
+<option value="Dipinjam">Dipinjam</option>
+</select>
+<label for="item-photo">URL Gambar (opsional)</label>
+<input id="item-photo" type="text" placeholder="https://..." />
+<button type="submit">Tambah Barang</button>
+</form>
+</aside>
 
-			<!--<aside class="side" aria-hidden="true">
-				<h3 style="margin-top:0;color:#0b3b03">Inventaris</h3>
-				<p style="margin:0 0 12px;color:#444">Ringkasan stok dan gambar ilustrasi.</p>
-				<img class="img-asset" src="https://api.builder.io/api/v1/image/assets/TEMP/2ae5557ccfcc99014805452e4c546fb3b77f6972?width=1388" alt="Inventaris" />
-				<div style="margin-top:12px">
-					<strong>Proyektor:</strong> 3 tersedia<br/>
-					<strong>Laptop:</strong> 0 tersedia<br/>
-					<strong>Meja:</strong> 5 tersedia
-				</div>
-			</aside>-->
-		</div>
+<div class="modal-overlay" id="edit-modal" aria-hidden="true">
+	<div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+		<button type="button" class="modal-close" id="close-edit-modal" aria-label="Tutup">×</button>
+		<h2 id="edit-modal-title">Edit Barang</h2>
+		<form id="edit-item-form" class="modal-form">
+			<label for="edit-item-name">Nama Barang</label>
+			<input id="edit-item-name" type="text" required />
+			<label for="edit-item-category">Kategori</label>
+			<select id="edit-item-category">
+				<option value="Elektronik">Elektronik</option>
+				<option value="Furniture">Furniture</option>
+				<option value="Alat Tulis">Alat Tulis</option>
+			</select>
+			<label for="edit-item-status">Status Barang</label>
+			<select id="edit-item-status">
+				<option value="Tersedia">Tersedia</option>
+				<option value="Dipinjam">Dipinjam</option>
+			</select>
+			<label for="edit-item-photo">URL Gambar</label>
+			<input id="edit-item-photo" type="text" placeholder="https://..." />
+			<button type="submit">Simpan Perubahan</button>
+		</form>
 	</div>
+</div>
 
-	<script>
-		function updateStatus(btn, status){
-			const row = btn.closest('tr');
-			const statusCell = row.querySelector('.status');
-			if(status === 'approved') statusCell.textContent = 'Disetujui';
-			if(status === 'denied') statusCell.textContent = 'Ditolak';
-			// In real app, send update to backend here
-			btn.disabled = true;
-		}
+<section class="content">
+<h1>Peminjaman Barang</h1>
+<p class="description">Tampilan barang mirip halaman user. Admin dapat menambahkan barang baru di samping.</p>
 
-		// Simple search filter
-		document.getElementById('q').addEventListener('input', function(){
-			const term = this.value.toLowerCase();
-			Array.from(document.querySelectorAll('#requests tr')).forEach(tr => {
-				tr.style.display = tr.innerText.toLowerCase().includes(term) ? '' : 'none';
-			});
-		});
-		document.getElementById('status-filter').addEventListener('change', function(){
-			const v = this.value;
-			Array.from(document.querySelectorAll('#requests tr')).forEach(tr => {
-				const s = tr.querySelector('.status').textContent.toLowerCase();
-				tr.style.display = (v === 'all' || s.includes(v)) ? '' : 'none';
-			});
-		});
-	</script>
+<div class="controls">
+<input class="search" id="search-items" type="search" placeholder="Cari barang..." aria-label="Cari barang" />
+<select class="select" id="sort-items" aria-label="Urutkan">
+<option value="latest">Urutkan: Terbaru</option>
+<option value="available">Urutkan: Tersedia</option>
+<option value="borrowed">Urutkan: Dipinjam</option>
+</select>
+</div>
+
+<div class="items" id="items"></div>
+</section>
+</div>
+
+<script>
+const items = [
+{id: 1, title: 'Proyektor Panasonic', status: 'Tersedia', category: 'Elektronik', image: 'https://via.placeholder.com/400x300?text=Proyektor'},
+{id: 2, title: 'Laptop Dell', status: 'Dipinjam', category: 'Elektronik', image: 'https://via.placeholder.com/400x300?text=Laptop'},
+{id: 3, title: 'Meja Lipat', status: 'Tersedia', category: 'Furniture', image: 'https://via.placeholder.com/400x300?text=Meja'},
+];
+
+function renderItems(filterCategory = 'all', filterStatus = 'all', search = '') {
+const list = document.getElementById('items');
+list.innerHTML = '';
+const normalizedSearch = search.toLowerCase();
+items.filter(item => {
+const matchesCategory = filterCategory === 'all' || item.category.toLowerCase() === filterCategory.toLowerCase();
+const matchesStatus = filterStatus === 'all' || item.status.toLowerCase() === filterStatus.toLowerCase();
+const matchesSearch = item.title.toLowerCase().includes(normalizedSearch);
+return matchesCategory && matchesStatus && matchesSearch;
+}).forEach(item => {
+const card = document.createElement('div');
+card.className = 'item';
+card.innerHTML = `
+<img src="${item.image}" alt="${item.title}" />
+<h3>${item.title}</h3>
+<p>Kategori: ${item.category}</p>
+<p>Status: ${item.status}</p>
+<div class="item-actions">
+<button type="button" class="primary" onclick="toggleBorrow(${item.id})" ${item.status === 'Dipinjam' ? 'disabled' : ''}>${item.status === 'Tersedia' ? 'Pinjam' : 'Tidak Tersedia'}</button>
+<button type="button" class="edit" onclick="editItem(${item.id})">Edit</button>
+<button type="button" class="delete" onclick="deleteItem(${item.id})">Hapus</button>
+</div>
+`;
+list.appendChild(card);
+});
+}
+
+function currentFilters() {
+return {
+category: document.getElementById('filter-category').value,
+status: document.getElementById('filter-status').value,
+search: document.getElementById('search-items').value,
+};
+}
+
+let editingItemId = null;
+const editModal = document.getElementById('edit-modal');
+const editForm = document.getElementById('edit-item-form');
+const editNameInput = document.getElementById('edit-item-name');
+const editCategoryInput = document.getElementById('edit-item-category');
+const editStatusInput = document.getElementById('edit-item-status');
+const editPhotoInput = document.getElementById('edit-item-photo');
+const closeEditButton = document.getElementById('close-edit-modal');
+
+function openEditModal(id) {
+const item = items.find(item => item.id === id);
+if (!item) return;
+editingItemId = id;
+editNameInput.value = item.title;
+editCategoryInput.value = item.category;
+editStatusInput.value = item.status;
+editPhotoInput.value = item.image;
+editModal.classList.add('active');
+editModal.setAttribute('aria-hidden', 'false');
+editNameInput.focus();
+}
+
+function closeEditModal() {
+editingItemId = null;
+editModal.classList.remove('active');
+editModal.setAttribute('aria-hidden', 'true');
+}
+
+closeEditButton.addEventListener('click', closeEditModal);
+editModal.addEventListener('click', event => {
+if (event.target === editModal) {
+closeEditModal();
+}
+});
+
+document.getElementById('search-items').addEventListener('input', () => {
+const filters = currentFilters();
+renderItems(filters.category, filters.status, filters.search);
+});
+
+document.getElementById('filter-category').addEventListener('change', () => {
+const filters = currentFilters();
+renderItems(filters.category, filters.status, filters.search);
+});
+
+document.getElementById('filter-status').addEventListener('change', () => {
+const filters = currentFilters();
+renderItems(filters.category, filters.status, filters.search);
+});
+
+document.getElementById('add-item-form').addEventListener('submit', event => {
+event.preventDefault();
+const title = document.getElementById('item-name').value.trim();
+const category = document.getElementById('item-category').value;
+const status = document.getElementById('item-status').value;
+const image = document.getElementById('item-photo').value.trim() || 'https://via.placeholder.com/400x300?text=Barang+Baru';
+if (!title) return;
+const nextId = items.length ? Math.max(...items.map(item => item.id)) + 1 : 1;
+items.unshift({id: nextId, title, category, status, image});
+document.getElementById('add-item-form').reset();
+const filters = currentFilters();
+renderItems(filters.category, filters.status, filters.search);
+});
+
+function deleteItem(id) {
+const item = items.find(item => item.id === id);
+if (!item) return;
+if (confirm(`Hapus barang "${item.title}" dari inventaris?`)) {
+const index = items.findIndex(item => item.id === id);
+items.splice(index, 1);
+const filters = currentFilters();
+renderItems(filters.category, filters.status, filters.search);
+}
+}
+
+function editItem(id) {
+openEditModal(id);
+}
+
+editForm.addEventListener('submit', event => {
+event.preventDefault();
+if (editingItemId === null) return;
+const item = items.find(item => item.id === editingItemId);
+if (!item) return;
+item.title = editNameInput.value.trim() || item.title;
+item.category = editCategoryInput.value.trim() || item.category;
+item.status = editStatusInput.value;
+item.image = editPhotoInput.value.trim() || item.image;
+closeEditModal();
+const filters = currentFilters();
+renderItems(filters.category, filters.status, filters.search);
+});
+
+function toggleBorrow(id) {
+const item = items.find(item => item.id === id);
+if (!item || item.status === 'Dipinjam') return;
+item.status = 'Dipinjam';
+const filters = currentFilters();
+renderItems(filters.category, filters.status, filters.search);
+}
+
+renderItems();
+</script>
 </body>
 </html>
-
