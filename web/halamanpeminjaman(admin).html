@@ -54,6 +54,8 @@ border: 1px solid var(--border);
 border-radius: 8px;
 font-size: 1rem;
 }
+.btn-logout {background: #d9534f; color: #fff; border-color: #d43f3a;}
+.btn-logout:hover {background: #c9302c;}
 .controls select, .sidebar select {background: #fff; appearance: none;}
 .controls button, .sidebar button {border: none; background: var(--green); color: #fff; cursor: pointer;}
 .items {display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 16px;}
@@ -164,14 +166,20 @@ font-size: 1rem;
 <option value="available">Urutkan: Tersedia</option>
 <option value="borrowed">Urutkan: Dipinjam</option>
 </select>
-</div>
+                    <button type="button" class="btn-logout" id="logout-button">Logout</button>
+                </div>
+                <div class="items" id="items"></div>
+            </section>
+        </div>
 
-<div class="items" id="items"></div>
-</section>
-</div>
-
-<script>
+        <script>
 let items = [];
+const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+if (!currentUser || currentUser.role !== 'Admin') {
+    localStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
+    return;
+}
 
 function getCurrentFilters() {
     return {
@@ -349,6 +357,11 @@ async function toggleBorrow(id) {
         console.error(error);
         alert('Terjadi kesalahan saat memperbarui status barang.');
     }
+}
+
+function logout() {
+    localStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
 }
 
 document.getElementById('search-items').addEventListener('input', renderItems);

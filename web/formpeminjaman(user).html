@@ -20,6 +20,7 @@
 		.actions{margin-top:16px;display:flex;gap:12px}
 		button{padding:10px 14px;border-radius:8px;border:none;background:var(--green);color:#fff;font-weight:700;cursor:pointer}
 		.secondary{background:#e6e6e6;color:#333}
+		.logout-button{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:none;border-radius:8px;background:#d9534f;color:#fff;font-weight:700;cursor:pointer;margin:12px 0}
 		.illustration{width:100%;border-radius:10px;border:2px solid #949494}
 		.note{font-size:13px;color:#555;text-align:center}
 	</style>
@@ -31,6 +32,7 @@
 				<div class="section">
 					<h1 id="form-title">Ajukan Peminjaman</h1>
 					<p class="note">Pilih barang yang tersedia dan kirim permintaan peminjaman.</p>
+					<button type="button" class="logout-button" onclick="logout()">Logout</button>
 				</div>
 
 				<div class="info-box" id="user-info"></div>
@@ -104,6 +106,12 @@
                 <p><strong>Peran:</strong> ${user.role}</p>
                 <p><strong>ID Akun:</strong> ${user.id}</p>
             `;
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('selectedItemId');
+            window.location.href = 'login.html';
         }
 
         async function handleSubmit(event) {

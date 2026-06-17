@@ -61,6 +61,7 @@
                         <option value="borrowed">Hanya Dipinjam</option>
                     </select>
                     <button type="button" class="btn-history" onclick="showHistory()">Lihat Riwayat</button>
+                    <button type="button" class="btn-logout" onclick="logout()">Logout</button>
                 </div>
                 <div class="items" id="items"></div>
 
@@ -83,6 +84,8 @@
                         .modal-error{padding:20px;color:#b00020}
                         .btn-history{padding:10px 12px;border-radius:8px;border:none;background:#fff;color:#0b3b03;border:1px solid #d0d0d0;cursor:pointer}
                         .btn-history:hover{background:#f3f3f3}
+                        .btn-logout{padding:10px 12px;border-radius:8px;border:none;background:#d9534f;color:#fff;cursor:pointer}
+                        .btn-logout:hover{background:#c9302c}
                     </style>
 
                     <script>
@@ -234,6 +237,12 @@
 
                         function closeHistory(){
                             document.getElementById('history-modal').removeAttribute('data-open');
+                        }
+
+                        function logout() {
+                            localStorage.removeItem('currentUser');
+                            localStorage.removeItem('selectedItemId');
+                            window.location.href = 'login.html';
                         }
 
                         document.addEventListener('click', function(e){

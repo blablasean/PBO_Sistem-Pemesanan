@@ -15,6 +15,8 @@
 		.list{margin-top:16px;border-top:1px solid #eee}
 		.record{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f3f3f3}
 		.record img{width:90px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e6e6e6}
+		.btn-logout{padding:10px 14px;border-radius:8px;border:none;background:#d9534f;color:#fff;cursor:pointer;margin:16px 0;}
+		.btn-logout:hover{background:#c9302c}
 		.meta{flex:1}
 		.meta h3{margin:0;font-size:16px}
 		.meta p{margin:4px 0;color:#666;font-size:13px}
@@ -30,6 +32,7 @@
 		<div class="card" role="main" aria-labelledby="history-title">
 			<h1 id="history-title">Riwayat Pemesanan</h1>
 			<p style="margin:0;color:#355d2a">Lihat riwayat peminjaman atau pemesanan barang Anda.</p>
+			<button type="button" class="btn-logout" onclick="logout()">Logout</button>
 
 			<div class="filters">
 				<input type="search" id="q" placeholder="Cari..." />
@@ -99,6 +102,11 @@
 				listEl.appendChild(item);
 			});
 			applyFilter();
+		}
+
+		function logout() {
+			localStorage.removeItem('currentUser');
+			window.location.href = 'login.html';
 		}
 
 		function applyFilter(){
