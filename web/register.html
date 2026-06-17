@@ -1,9 +1,9 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="id">
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
-	<title>Halaman Login</title>
+	<title>Buat Akun Baru</title>
 	<style>
 		:root{--green:#3C8322;--card-radius:15px}
 		html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--green)}
@@ -16,7 +16,7 @@
 		p.lead{margin:0 0 24px;color:#355d2a}
 		.form-group{margin-bottom:16px}
 		label{display:block;margin-bottom:6px;font-weight:600;color:#333}
-		input[type="email"],input[type="password"]{width:100%;padding:12px;border:1px solid #dcdcdc;border-radius:8px;font-size:15px}
+		input[type="text"],input[type="email"],input[type="password"]{width:100%;padding:12px;border:1px solid #dcdcdc;border-radius:8px;font-size:15px}
 		button{width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer}
 		.small{font-size:13px;color:#666;margin-top:10px;text-align:center}
 		.img-placeholder{width:90%;max-width:520px;border-radius:12px;border:2px solid #949494}
@@ -24,29 +24,36 @@
 </head>
 <body>
 	<div class="container">
-		<div class="card" role="main" aria-labelledby="login-title">
+		<div class="card" role="main" aria-labelledby="register-title">
 			<div class="left">
-                <center>
-				<h1 id="login-title">Selamat Datang</h1>
-				<p class="lead">Silahkan login ke akun untuk melanjutkan</p>
+				<center>
+					<h1 id="register-title">Buat Akun Baru</h1>
+					<p class="lead">Isi data akun untuk mulai menggunakan sistem peminjaman.</p>
 				</center>
-                <form id="login-form" onsubmit="event.preventDefault(); alert('Login submitted');">
+				<form id="register-form" onsubmit="event.preventDefault(); alert('Akun berhasil dibuat');">
 					<div class="form-group">
-						<label for="email">Email</label>
-						<input id="email" type="email" placeholder="email@gmail.com" required />
+						<label for="name">Nama Lengkap</label>
+						<input id="name" type="text" placeholder="Nama lengkap" required />
 					</div>
 					<div class="form-group">
-						<label for="password">Kata sandi</label>
-						<input id="password" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
+						<label for="register-email">Email</label>
+						<input id="register-email" type="email" placeholder="email@gmail.com" required />
 					</div>
 					<div class="form-group">
-						<button type="submit">Masuk</button>
+						<label for="register-password">Kata sandi</label>
+						<input id="register-password" type="password" placeholder="••••••••" required />
 					</div>
-					<div class="small">Belum punya akun? <a href="register.html">Buat akun</a></div>
+					<div class="form-group">
+						<label for="confirm-password">Ulangi kata sandi</label>
+						<input id="confirm-password" type="password" placeholder="••••••••" required />
+					</div>
+					<div class="form-group">
+						<button type="submit">Daftar Akun</button>
+					</div>
+					<div class="small">Sudah punya akun? <a href="login.html">Masuk</a></div>
 				</form>
 			</div>
 		</div>
 	</div>
 </body>
 </html>
-
