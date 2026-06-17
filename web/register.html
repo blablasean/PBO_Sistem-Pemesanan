@@ -5,47 +5,49 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<title>Buat Akun Baru</title>
 	<style>
-		:root{--green:#3C8322;--card-radius:15px}
-		html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--green)}
+		*{box-sizing:border-box}
+		:root{--green:#3C8322;--card-radius:15px;--text:#1f391e;--muted:#5f6d5a}
+		html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--green);color:var(--text)}
 		.container{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
-		.card{width:100%;max-width:1100px;background:#fff;border-radius:var(--card-radius);box-shadow:0 8px 24px rgba(0,0,0,.15);display:flex;overflow:hidden}
-		@media(max-width:900px){.card{flex-direction:column}}
-		.left{flex:1;padding:48px;display:flex;flex-direction:column;justify-content:center}
-		.right{flex:1;background:#f5f5f5;display:flex;align-items:center;justify-content:center;padding:24px}
-		h1{margin:0 0 8px;font-size:28px;color:#0b3b03}
-		p.lead{margin:0 0 24px;color:#355d2a}
-		.form-group{margin-bottom:16px}
-		label{display:block;margin-bottom:6px;font-weight:600;color:#333}
-		input[type="text"],input[type="email"],input[type="password"]{width:100%;padding:12px;border:1px solid #dcdcdc;border-radius:8px;font-size:15px}
-		button{width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer}
-		.small{font-size:13px;color:#666;margin-top:10px;text-align:center}
-		.img-placeholder{width:90%;max-width:520px;border-radius:12px;border:2px solid #949494}
+		.card{width:100%;max-width:700px;background:#fff;border-radius:var(--card-radius);box-shadow:0 12px 28px rgba(0,0,0,.14);overflow:hidden}
+		@media(max-width:640px){.card{margin:16px}}
+		.left{padding:48px;display:flex;flex-direction:column;gap:18px}
+		h1{margin:0;font-size:32px;color:#0b3b03}
+		p.lead{margin:0;color:var(--muted);line-height:1.6}
+		form{width:100%}
+		.form-group{margin-bottom:18px}
+		label{display:block;margin-bottom:8px;font-weight:600;color:#333}
+		input[type="text"],input[type="email"],input[type="password"]{width:100%;padding:14px 16px;border:1px solid #dcdcdc;border-radius:12px;font-size:15px;outline:none;transition:border .2s ease}
+		input[type="text"]:focus,input[type="email"]:focus,input[type="password"]:focus{border-color:var(--green)}
+		button{width:100%;padding:14px 16px;background:var(--green);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s ease}
+		button:hover{background:#2f6a1b}
+		.small{font-size:13px;color:#666;margin-top:8px;text-align:center}
+		a{color:var(--green);text-decoration:none}
+		a:hover{text-decoration:underline}
 	</style>
 </head>
 <body>
 	<div class="container">
 		<div class="card" role="main" aria-labelledby="register-title">
 			<div class="left">
-				<center>
 					<h1 id="register-title">Buat Akun Baru</h1>
 					<p class="lead">Isi data akun untuk mulai menggunakan sistem peminjaman.</p>
-				</center>
-<form id="register-form">
+	<form id="register-form">
                     <div class="form-group">
                         <label for="name">Nama Lengkap</label>
-                        <input id="name" type="text" placeholder="Nama lengkap" required />
+                        <input id="name" name="name" type="text" autocomplete="name" placeholder="Nama lengkap" required />
                     </div>
                     <div class="form-group">
                         <label for="register-email">Email</label>
-                        <input id="register-email" type="email" placeholder="email@gmail.com" required />
+                        <input id="register-email" name="email" type="email" autocomplete="username email" placeholder="email@example.com" required />
                     </div>
                     <div class="form-group">
                         <label for="register-password">Kata sandi</label>
-                        <input id="register-password" type="password" placeholder="••••••••" required />
+                        <input id="register-password" name="password" type="password" autocomplete="new-password" placeholder="••••••••" required />
                     </div>
                     <div class="form-group">
                         <label for="confirm-password">Ulangi kata sandi</label>
-                        <input id="confirm-password" type="password" placeholder="••••••••" required />
+                        <input id="confirm-password" name="confirmPassword" type="password" autocomplete="new-password" placeholder="••••••••" required />
                     </div>
                     <div class="form-group">
                         <button type="submit">Daftar Akun</button>

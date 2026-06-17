@@ -2,5 +2,6 @@
   "java.project.sourcePaths": [
     "backend/java/src/main/java"
 ],
-"livePreview.defaultPreviewPath": "/web/halamanpeminjaman(admin).html"
+"livePreview.defaultPreviewPath": "/web/halamanpeminjaman(admin).html",
+"java.configuration.updateBuildConfiguration": "interactive"
 }
