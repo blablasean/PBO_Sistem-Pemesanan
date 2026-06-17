@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Form Peminjaman</title>
+	<style>
+		:root{--green:#3C8322;--card-radius:12px}
+		html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--green)}
+		.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+		.card{width:100%;max-width:1000px;background:#fff;border-radius:var(--card-radius);box-shadow:0 12px 30px rgba(0,0,0,.12);display:grid;grid-template-columns:1fr 420px;gap:24px;overflow:hidden}
+		@media(max-width:900px){.card{grid-template-columns:1fr;padding:18px}}
+		.form{padding:32px}
+		.side{background:#f7f7f7;padding:24px;display:flex;flex-direction:column;gap:12px;align-items:center}
+		h1{margin:0 0 8px;color:#0b3b03}
+		label{display:block;margin:10px 0 6px;font-weight:600;color:#333}
+		input,select,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px}
+		textarea{min-height:100px}
+		.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+		.actions{margin-top:16px;display:flex;gap:12px}
+		button{padding:10px 14px;border-radius:8px;border:none;background:var(--green);color:#fff;font-weight:700;cursor:pointer}
+		.secondary{background:#e6e6e6;color:#333}
+		.illustration{width:100%;border-radius:10px;border:2px solid #949494}
+		.note{font-size:13px;color:#555;text-align:center}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<div class="card" role="main" aria-labelledby="form-title">
+			<form class="form" id="borrow-form" onsubmit="handleSubmit(event)">
+				<h1 id="form-title">Form Peminjaman</h1>
+				<p class="note">Isi data berikut untuk mengajukan peminjaman barang.</p>
+
+				<label for="nama">Nama Peminjam</label>
+				<input id="nama" name="nama" type="text" placeholder="Nama lengkap" required />
+
+				<div class="row">
+					<div>
+						<label for="nim">NIM / ID</label>
+						<input id="nim" name="nim" type="text" placeholder="12345678" required />
+					</div>
+					<div>
+						<label for="telepon">Telepon</label>
+						<input id="telepon" name="telepon" type="tel" placeholder="0812xxxx" />
+					</div>
+				</div>
+
+				<label for="barang">Barang</label>
+				<select id="barang" name="barang" required>
+					<option value="">-- Pilih barang --</option>
+					<option value="proyektor">Proyektor Panasonic</option>
+					<option value="laptop">Laptop Dell</option>
+					<option value="meja">Meja Lipat</option>
+				</select>
+
+				<div class="row">
+					<div>
+						<label for="tanggal_pinjam">Tanggal Pinjam</label>
+						<input id="tanggal_pinjam" name="tanggal_pinjam" type="date" required />
+					</div>
+					<div>
+						<label for="tanggal_kembali">Tanggal Kembali</label>
+						<input id="tanggal_kembali" name="tanggal_kembali" type="date" required />
+					</div>
+				</div>
+
+				<label for="jumlah">Jumlah</label>
+				<input id="jumlah" name="jumlah" type="number" min="1" value="1" required />
+
+				<label for="alasan">Alasan Peminjaman</label>
+				<textarea id="alasan" name="alasan" placeholder="Jelaskan kebutuhan peminjaman..." required></textarea>
+
+				<div class="actions">
+					<button type="submit">Ajukan Peminjaman</button>
+					<button type="button" class="secondary" onclick="document.getElementById('borrow-form').reset()">Reset</button>
+				</div>
+			</form>
+
+			<aside class="side" aria-hidden="true">
+				<img class="illustration" src="https://api.builder.io/api/v1/image/assets/TEMP/fa6187e7d32f2d9783fcfef4222bb3decc54d6de?width=1303" alt="Ilustrasi Form Peminjaman" />
+				<div class="note">Periksa kembali data sebelum mengajukan. Hubungi admin jika butuh bantuan.</div>
+			</aside>
+		</div>
+	</div>
+
+	<script>
+		function handleSubmit(e){
+			e.preventDefault();
+			const data = Object.fromEntries(new FormData(e.target).entries());
+			console.log('Form data:', data);
+			alert('Pengajuan dikirim. Cek konsol untuk data contoh.');
+			e.target.reset();
+		}
+	</script>
+</body>
+</html>
+
