@@ -12,6 +12,30 @@ public class Mahasiswa extends User {
         return nim;
     }
 
+    public void pinjamBarang(Barang b) {
+        System.out.printf("%s meminjam barang: %s (ID=%s)%n", getNama(), b.getNama(), b.getId());
+    }
+
+    public void kembalikanBarang(Transaksi t) {
+        System.out.printf("%s mengembalikan barang: %s (Transaksi ID=%s)%n", getNama(), t.getBarang().getNama(), t.getId());
+    }
+
+    public void bayarTransaksi(Transaksi t) {
+        System.out.printf("%s membayar transaksi: %s dengan barang %s%n", getNama(), t.getId(), t.getBarang().getNama());
+    }
+
+    @Override
+    public void login() {
+        super.login();
+        System.out.printf("%s berhasil login sebagai %s.%n", getNama(), getRole());
+    }
+
+    @Override
+    public void logout() {
+        super.logout();
+        System.out.printf("%s berhasil logout.%n", getNama());
+    }
+
     @Override
     public String printDetails() {
         return String.format("%s, NIM=%s", super.printDetails(), nim);
