@@ -1,4 +1,4 @@
-package com.example.backend;
+package backend.java.src.main.java.com.example.backend;
 
 public class Mahasiswa extends User {
     private final String nim;

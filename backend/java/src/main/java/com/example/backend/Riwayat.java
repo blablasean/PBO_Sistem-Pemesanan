@@ -1,4 +1,4 @@
-package com.example.backend;
+package backend.java.src.main.java.com.example.backend;
 
 import java.util.ArrayList;
 import java.util.Collections;
