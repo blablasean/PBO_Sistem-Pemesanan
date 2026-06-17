@@ -19,6 +19,7 @@ public class Riwayat implements Printable {
         return Collections.unmodifiableList(daftarTransaksi);
     }
 
+    @Override
     public String printInfo() {
         return printDetails();
     }

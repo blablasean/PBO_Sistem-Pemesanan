@@ -53,6 +53,7 @@ public abstract class Barang implements Printable {
 
     public abstract String getCategory();
 
+    @Override
     public String printInfo() {
         return printDetails();
     }

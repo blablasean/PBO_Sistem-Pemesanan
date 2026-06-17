@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-public class Transaksi implements Printable {
+public final class Transaksi implements Printable {
     private final String idTransaksi;
     private final Date tanggalPinjam;
     private final Date tanggalKembali;
@@ -76,6 +76,7 @@ public class Transaksi implements Printable {
         System.out.printf("Transaksi %s telah dibayar. Total biaya: %.2f%n", idTransaksi, totalBiaya);
     }
 
+    @Override
     public String printInfo() {
         return printDetails();
     }
