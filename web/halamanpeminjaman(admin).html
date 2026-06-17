@@ -124,8 +124,8 @@ font-size: 1rem;
 <option value="Tersedia">Tersedia</option>
 <option value="Dipinjam">Dipinjam</option>
 </select>
-<label for="item-photo">URL Gambar (opsional)</label>
-<input id="item-photo" type="text" placeholder="https://..." />
+<label for="item-photo">Upload Gambar (opsional)</label>
+<input id="item-photo" type="file" accept="image/*" />
 <button type="submit">Tambah Barang</button>
 </form>
 </aside>
@@ -148,8 +148,8 @@ font-size: 1rem;
 				<option value="Tersedia">Tersedia</option>
 				<option value="Dipinjam">Dipinjam</option>
 			</select>
-			<label for="edit-item-photo">URL Gambar</label>
-			<input id="edit-item-photo" type="text" placeholder="https://..." />
+			<label for="edit-item-photo">Upload Gambar Baru</label>
+			<input id="edit-item-photo" type="file" accept="image/*" />
 			<button type="submit">Simpan Perubahan</button>
 		</form>
 	</div>
@@ -178,7 +178,6 @@ const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 if (!currentUser || currentUser.role !== 'Admin') {
     localStorage.removeItem('currentUser');
     window.location.href = 'login.html';
-    return;
 }
 
 function getCurrentFilters() {
@@ -218,8 +217,9 @@ function renderItems() {
     visible.forEach(item => {
         const card = document.createElement('div');
         card.className = 'item';
+        const imageSrc = item.image_data || item.image_url || 'https://via.placeholder.com/400x300?text=Barang';
         card.innerHTML = `
-            <img src="${item.image_url || 'https://via.placeholder.com/400x300?text=Barang'}" alt="${item.name}" />
+            <img src="${imageSrc}" alt="${item.name}" />
             <h3>${item.name}</h3>
             <p>Kategori: ${item.category}</p>
             <p>Status: ${item.status}</p>
@@ -233,18 +233,32 @@ function renderItems() {
     });
 }
 
+async function readImageFile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+    });
+}
+
 async function addItem(event) {
     event.preventDefault();
     const title = document.getElementById('item-name').value.trim();
     const category = document.getElementById('item-category').value;
     const status = document.getElementById('item-status').value;
-    const image = document.getElementById('item-photo').value.trim() || 'https://via.placeholder.com/400x300?text=Barang+Baru';
+    const imageInput = document.getElementById('item-photo');
+    const imageFile = imageInput.files[0];
     if (!title) return;
     try {
+        const payload = {name: title, category, status, price: 0};
+        if (imageFile) {
+            payload.image_data = await readImageFile(imageFile);
+        }
         const response = await fetch('/api/barang', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({name: title, category, status, price: 0, image_url: image})
+            body: JSON.stringify(payload)
         });
         const result = await response.json();
         if (response.ok && result.success) {
@@ -293,7 +307,7 @@ function openEditModal(id) {
     editNameInput.value = item.name;
     editCategoryInput.value = item.category;
     editStatusInput.value = item.status;
-    editPhotoInput.value = item.image_url || '';
+    editPhotoInput.value = '';
     editModal.classList.add('active');
     editModal.setAttribute('aria-hidden', 'false');
     editNameInput.focus();
@@ -318,12 +332,16 @@ editForm.addEventListener('submit', async event => {
     const title = editNameInput.value.trim();
     const category = editCategoryInput.value;
     const status = editStatusInput.value;
-    const image = editPhotoInput.value.trim() || 'https://via.placeholder.com/400x300?text=Barang';
+    const imageFile = editPhotoInput.files[0];
     try {
+        const payload = {name: title, category, status, price: 0};
+        if (imageFile) {
+            payload.image_data = await readImageFile(imageFile);
+        }
         const response = await fetch('/api/barang/' + editingItemId, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({name: title, category, status, price: 0, image_url: image})
+            body: JSON.stringify(payload)
         });
         const result = await response.json();
         if (response.ok && result.success) {
@@ -345,7 +363,7 @@ async function toggleBorrow(id) {
         const response = await fetch('/api/barang/' + id, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({name: item.name, category: item.category, status: 'Dipinjam', price: 0, image_url: item.image_url || 'https://via.placeholder.com/400x300?text=Barang'})
+            body: JSON.stringify({name: item.name, category: item.category, status: 'Dipinjam', price: 0})
         });
         const result = await response.json();
         if (response.ok && result.success) {

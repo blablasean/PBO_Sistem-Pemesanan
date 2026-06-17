@@ -23,10 +23,11 @@ public class DatabaseHelper {
     public void initSchema() throws SQLException {
         try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS users (id VARCHAR PRIMARY KEY, name VARCHAR, email VARCHAR, role VARCHAR, password VARCHAR)");
-            statement.execute("CREATE TABLE IF NOT EXISTS barang (id VARCHAR PRIMARY KEY, name VARCHAR, status VARCHAR, category VARCHAR, price DOUBLE, image_url VARCHAR)");
+            statement.execute("CREATE TABLE IF NOT EXISTS barang (id VARCHAR PRIMARY KEY, name VARCHAR, status VARCHAR, category VARCHAR, price DOUBLE, image_url VARCHAR, image_data CLOB)");
             statement.execute("CREATE TABLE IF NOT EXISTS transaksi (id VARCHAR PRIMARY KEY, user_id VARCHAR, barang_id VARCHAR, borrow_date DATE, return_date DATE, status VARCHAR, quantity INT DEFAULT 1, note VARCHAR(1024), total_cost DOUBLE, FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (barang_id) REFERENCES barang(id))");
             ensureColumn("transaksi", "quantity INT DEFAULT 1");
             ensureColumn("transaksi", "note VARCHAR(1024)");
+            ensureColumn("barang", "image_data CLOB");
         }
     }
 
@@ -51,8 +52,8 @@ public class DatabaseHelper {
         }
     }
 
-    public void insertBarang(String id, String name, String status, String category, double price, String imageUrl) throws SQLException {
-        String sql = "MERGE INTO barang (id, name, status, category, price, image_url) KEY(id) VALUES (?, ?, ?, ?, ?, ?)";
+    public void insertBarang(String id, String name, String status, String category, double price, String imageUrl, String imageData) throws SQLException {
+        String sql = "MERGE INTO barang (id, name, status, category, price, image_url, image_data) KEY(id) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, id);
             statement.setString(2, name);
@@ -60,6 +61,7 @@ public class DatabaseHelper {
             statement.setString(4, category);
             statement.setDouble(5, price);
             statement.setString(6, imageUrl);
+            statement.setString(7, imageData);
             statement.executeUpdate();
         }
     }
@@ -128,7 +130,7 @@ public class DatabaseHelper {
 
     public List<Map<String, Object>> getAllBarang() throws SQLException {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT id, name, status, category, price, image_url FROM barang";
+        String sql = "SELECT id, name, status, category, price, image_url, image_data FROM barang";
         try (Connection connection = getConnection(); Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(sql)) {
             while (resultSet.next()) {
                 Map<String, Object> row = new HashMap<>();
@@ -137,7 +139,10 @@ public class DatabaseHelper {
                 row.put("status", resultSet.getString("status"));
                 row.put("category", resultSet.getString("category"));
                 row.put("price", resultSet.getDouble("price"));
-                row.put("image_url", resultSet.getString("image_url"));
+                String imageData = resultSet.getString("image_data");
+                String imageUrl = resultSet.getString("image_url");
+                row.put("image_url", imageData != null && !imageData.isBlank() ? imageData : imageUrl);
+                row.put("image_data", imageData);
                 list.add(row);
             }
         }
@@ -145,7 +150,7 @@ public class DatabaseHelper {
     }
 
     public Map<String, Object> getBarangById(String id) throws SQLException {
-        String sql = "SELECT id, name, status, category, price, image_url FROM barang WHERE id = ?";
+        String sql = "SELECT id, name, status, category, price, image_url, image_data FROM barang WHERE id = ?";
         try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -156,7 +161,10 @@ public class DatabaseHelper {
                     row.put("status", resultSet.getString("status"));
                     row.put("category", resultSet.getString("category"));
                     row.put("price", resultSet.getDouble("price"));
-                    row.put("image_url", resultSet.getString("image_url"));
+                    String imageData = resultSet.getString("image_data");
+                    String imageUrl = resultSet.getString("image_url");
+                    row.put("image_url", imageData != null && !imageData.isBlank() ? imageData : imageUrl);
+                    row.put("image_data", imageData);
                     return row;
                 }
             }
@@ -164,15 +172,16 @@ public class DatabaseHelper {
         return null;
     }
 
-    public void updateBarang(String id, String name, String status, String category, double price, String imageUrl) throws SQLException {
-        String sql = "UPDATE barang SET name = ?, status = ?, category = ?, price = ?, image_url = ? WHERE id = ?";
+    public void updateBarang(String id, String name, String status, String category, double price, String imageUrl, String imageData) throws SQLException {
+        String sql = "UPDATE barang SET name = ?, status = ?, category = ?, price = ?, image_url = ?, image_data = ? WHERE id = ?";
         try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, name);
             statement.setString(2, status);
             statement.setString(3, category);
             statement.setDouble(4, price);
             statement.setString(5, imageUrl);
-            statement.setString(6, id);
+            statement.setString(6, imageData);
+            statement.setString(7, id);
             statement.executeUpdate();
         }
     }

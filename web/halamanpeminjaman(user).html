@@ -136,8 +136,9 @@
                             visibleItems.forEach(item => {
                                 const card = document.createElement('div');
                                 card.className = 'item';
+                                const imageSrc = item.image_data || item.image_url || 'https://via.placeholder.com/400x300?text=Barang';
                                 card.innerHTML = `
-                                    <img src="${item.image_url || 'https://via.placeholder.com/400x300?text=Barang'}" alt="${item.name}" />
+                                    <img src="${imageSrc}" alt="${item.name}" />
                                     <h3>${item.name}</h3>
                                     <p>Kategori: ${item.category}</p>
                                     <p>Status: ${item.status}</p>
@@ -197,7 +198,7 @@
                                 row.style.gap = '12px';
                                 row.style.alignItems = 'center';
                                 const img = document.createElement('img');
-                                img.src = rec.image_url || ('https://via.placeholder.com/400x300?text=' + encodeURIComponent(rec.barang_name || 'Item'));
+                                img.src = rec.image_data || rec.image_url || ('https://via.placeholder.com/400x300?text=' + encodeURIComponent(rec.barang_name || 'Item'));
                                 img.alt = rec.barang_name || 'Item';
                                 img.style.width = '120px';
                                 img.style.height = '80px';

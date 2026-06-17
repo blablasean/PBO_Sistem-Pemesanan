@@ -91,7 +91,7 @@
 				const item = document.createElement('div');
 				item.className = 'record';
 				item.innerHTML = `
-					<img src="${rec.image_url || 'https://via.placeholder.com/400x300?text=Barang'}" alt="${rec.barang_name || 'Barang'}" />
+					<img src="${rec.image_data || rec.image_url || 'https://via.placeholder.com/400x300?text=Barang'}" alt="${rec.barang_name || 'Barang'}" />
 					<div class="meta">
 						<h3>${rec.barang_name || 'Barang'}</h3>
 						<p>Dipinjam: ${rec.borrow_date || '-'} — Dikembalikan: ${rec.return_date || 'Belum kembali'}</p>

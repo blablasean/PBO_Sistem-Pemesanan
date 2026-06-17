@@ -44,8 +44,8 @@ public class App {
         db.insertUser("u1", "Mahasiswa Instansi", "user@instansi.com", "Mahasiswa", "12345678");
         db.insertUser("u2", "Admin Toko", "admin@toko.com", "Admin", "admin123");
         db.insertUser("u3", "Admin Telkom University", "admin@telkomuniversity.ac.id", "Admin", "123456");
-        db.insertBarang("b1", "Kamera Sony", "Tersedia", "Elektronik", 3500000, "https://via.placeholder.com/400x300?text=Kamera");
-        db.insertBarang("b2", "Meja Lipat", "Tersedia", "Furniture", 250000, "https://via.placeholder.com/400x300?text=Meja");
+        db.insertBarang("b1", "Kamera Sony", "Tersedia", "Elektronik", 3500000, "https://via.placeholder.com/400x300?text=Kamera", null);
+        db.insertBarang("b2", "Meja Lipat", "Tersedia", "Furniture", 250000, "https://via.placeholder.com/400x300?text=Meja", null);
     }
 
     private static void handleStatic(HttpExchange exchange) throws IOException {
@@ -145,24 +145,39 @@ public class App {
                 String category = request.get("category");
                 String status = request.get("status");
                 String imageUrl = request.get("image_url");
+                String imageData = request.get("image_data");
                 double price = request.getOrDefault("price", "0").isBlank() ? 0 : Double.parseDouble(request.get("price"));
                 if (name == null || category == null || status == null) {
                     sendJson(exchange, 400, Map.of("success", false, "message", "Nama, kategori, dan status barang wajib diisi."));
                     return;
                 }
                 String itemId = "b" + UUID.randomUUID().toString().replaceAll("[^0-9]", "").substring(0, 8);
-                db.insertBarang(itemId, name, status, category, price, imageUrl != null && !imageUrl.isBlank() ? imageUrl : "https://via.placeholder.com/400x300?text=Barang+Baru");
+                db.insertBarang(itemId, name, status, category, price,
+                        imageUrl != null && !imageUrl.isBlank() ? imageUrl : "https://via.placeholder.com/400x300?text=Barang+Baru",
+                        imageData != null && !imageData.isBlank() ? imageData : null);
                 sendJson(exchange, 201, Map.of("success", true, "id", itemId));
                 return;
             }
             if (id != null && method.equalsIgnoreCase("PUT")) {
                 Map<String, String> request = parseJsonBody(exchange);
-                String name = request.get("name");
-                String category = request.get("category");
-                String status = request.get("status");
+                Map<String, Object> existingBarang = db.getBarangById(id);
+                if (existingBarang == null) {
+                    sendJson(exchange, 404, Map.of("success", false, "message", "Barang tidak ditemukan."));
+                    return;
+                }
+                String name = request.getOrDefault("name", existingBarang.get("name").toString());
+                String category = request.getOrDefault("category", existingBarang.get("category").toString());
+                String status = request.getOrDefault("status", existingBarang.get("status").toString());
                 String imageUrl = request.get("image_url");
-                double price = request.getOrDefault("price", "0").isBlank() ? 0 : Double.parseDouble(request.get("price"));
-                db.updateBarang(id, name, status, category, price, imageUrl != null && !imageUrl.isBlank() ? imageUrl : "https://via.placeholder.com/400x300?text=Barang");
+                String imageData = request.get("image_data");
+                double price = request.getOrDefault("price", existingBarang.get("price").toString()).isBlank() ? 0 : Double.parseDouble(request.getOrDefault("price", existingBarang.get("price").toString()));
+                if ((imageUrl == null || imageUrl.isBlank()) && (imageData == null || imageData.isBlank())) {
+                    imageUrl = existingBarang.get("image_url") != null ? existingBarang.get("image_url").toString() : "https://via.placeholder.com/400x300?text=Barang";
+                    imageData = existingBarang.get("image_data") != null ? existingBarang.get("image_data").toString() : null;
+                }
+                db.updateBarang(id, name, status, category, price,
+                        imageUrl != null && !imageUrl.isBlank() ? imageUrl : "https://via.placeholder.com/400x300?text=Barang",
+                        imageData);
                 sendJson(exchange, 200, Map.of("success", true, "message", "Barang diperbarui."));
                 return;
             }
