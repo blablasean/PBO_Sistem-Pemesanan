@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="id">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Peminjaman Barang (Admin)</title>
+	<style>
+		:root{--green:#3C8322}
+		html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--green)}
+		.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+		.panel{width:100%;max-width:1200px;background:#fff;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.12);display:flex;gap:16px;overflow:hidden}
+		@media(max-width:980px){.panel{flex-direction:column}}
+		.list-area{flex:1;padding:20px}
+		.side{width:320px;background:#f7f7f7;padding:20px}
+		h1{margin:0 0 6px;color:#0b3b03}
+		.controls{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+		.controls input,.controls select{padding:10px;border:1px solid #ddd;border-radius:8px}
+		table{width:100%;border-collapse:collapse;margin-top:12px}
+		th,td{padding:10px;border-bottom:1px solid #f3f3f3;text-align:left}
+		th{background:#fbfbfb}
+		.actions button{margin-right:6px;padding:6px 10px;border-radius:8px;border:none;cursor:pointer}
+		.approve{background:#0b3b03;color:#fff}
+		.deny{background:#d9534f;color:#fff}
+		.img-asset{width:100%;border-radius:12px;border:2px solid #949494}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<div class="panel" role="main" aria-labelledby="admin-title">
+			<section class="list-area">
+				<h1 id="admin-title">Peminjaman Barang — Admin</h1>
+				<p style="margin:0;color:#355d2a">Kelola permintaan peminjaman dan inventaris.</p>
+
+				<div class="controls">
+					<input type="search" id="q" placeholder="Cari peminjam atau barang..." />
+					<select id="status-filter">
+						<option value="all">Semua Status</option>
+						<option value="pending">Menunggu</option>
+						<option value="approved">Disetujui</option>
+						<option value="denied">Ditolak</option>
+					</select>
+				</div>
+
+				<table aria-label="Daftar permintaan">
+					<thead>
+						<tr><th>Nama</th><th>Barang</th><th>Tanggal</th><th>Jumlah</th><th>Status</th><th>Aksi</th></tr>
+					</thead>
+					<tbody id="requests">
+						<tr>
+							<td>Ahmad</td>
+							<td>Proyektor Panasonic</td>
+							<td>16 Jun 2026</td>
+							<td>1</td>
+							<td class="status">Menunggu</td>
+							<td class="actions">
+								<button class="approve" onclick="updateStatus(this,'approved')">Setujui</button>
+								<button class="deny" onclick="updateStatus(this,'denied')">Tolak</button>
+							</td>
+						</tr>
+						<tr>
+							<td>Siti</td>
+							<td>Meja Lipat</td>
+							<td>15 Jun 2026</td>
+							<td>2</td>
+							<td class="status">Disetujui</td>
+							<td class="actions">
+								<button class="approve" onclick="updateStatus(this,'approved')">Setujui</button>
+								<button class="deny" onclick="updateStatus(this,'denied')">Tolak</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<!--<aside class="side" aria-hidden="true">
+				<h3 style="margin-top:0;color:#0b3b03">Inventaris</h3>
+				<p style="margin:0 0 12px;color:#444">Ringkasan stok dan gambar ilustrasi.</p>
+				<img class="img-asset" src="https://api.builder.io/api/v1/image/assets/TEMP/2ae5557ccfcc99014805452e4c546fb3b77f6972?width=1388" alt="Inventaris" />
+				<div style="margin-top:12px">
+					<strong>Proyektor:</strong> 3 tersedia<br/>
+					<strong>Laptop:</strong> 0 tersedia<br/>
+					<strong>Meja:</strong> 5 tersedia
+				</div>
+			</aside>-->
+		</div>
+	</div>
+
+	<script>
+		function updateStatus(btn, status){
+			const row = btn.closest('tr');
+			const statusCell = row.querySelector('.status');
+			if(status === 'approved') statusCell.textContent = 'Disetujui';
+			if(status === 'denied') statusCell.textContent = 'Ditolak';
+			// In real app, send update to backend here
+			btn.disabled = true;
+		}
+
+		// Simple search filter
+		document.getElementById('q').addEventListener('input', function(){
+			const term = this.value.toLowerCase();
+			Array.from(document.querySelectorAll('#requests tr')).forEach(tr => {
+				tr.style.display = tr.innerText.toLowerCase().includes(term) ? '' : 'none';
+			});
+		});
+		document.getElementById('status-filter').addEventListener('change', function(){
+			const v = this.value;
+			Array.from(document.querySelectorAll('#requests tr')).forEach(tr => {
+				const s = tr.querySelector('.status').textContent.toLowerCase();
+				tr.style.display = (v === 'all' || s.includes(v)) ? '' : 'none';
+			});
+		});
+	</script>
+</body>
+</html>
+
