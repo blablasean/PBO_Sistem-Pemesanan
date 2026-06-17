@@ -30,23 +30,52 @@
 				<h1 id="login-title">Selamat Datang</h1>
 				<p class="lead">Silahkan login ke akun untuk melanjutkan</p>
 				</center>
-                <form id="login-form" onsubmit="event.preventDefault(); alert('Login submitted');">
-					<div class="form-group">
-						<label for="email">Email</label>
-						<input id="email" type="email" placeholder="email@gmail.com" required />
-					</div>
-					<div class="form-group">
-						<label for="password">Kata sandi</label>
-						<input id="password" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
-					</div>
-					<div class="form-group">
-						<button type="submit">Masuk</button>
-					</div>
-					<div class="small">Belum punya akun? <a href="register.html">Buat akun</a></div>
-				</form>
-			</div>
-		</div>
-	</div>
+<form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input id="email" type="email" placeholder="email@gmail.com" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Kata sandi</label>
+                        <input id="password" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Masuk</button>
+                    </div>
+                    <div class="small">Belum punya akun? <a href="register.html">Buat akun</a></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    localStorage.setItem('currentUser', JSON.stringify({id: data.userId, role: data.role, name: data.name}));
+                    if (data.role && data.role.toLowerCase() === 'admin') {
+                        window.location.href = 'halamanpeminjaman(admin).html';
+                    } else {
+                        window.location.href = 'halamanpeminjaman(user).html';
+                    }
+                } else {
+                    alert(data.message || 'Login gagal. Periksa email dan kata sandi.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan saat login. Coba lagi.');
+            }
+        });
+    </script>
 </body>
 </html>
 

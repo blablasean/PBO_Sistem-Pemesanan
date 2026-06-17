@@ -75,28 +75,65 @@
 	</div>
 
 	<script>
-		// Simple client-side filtering example
 		const listEl = document.getElementById('list');
 		const q = document.getElementById('q');
 		const status = document.getElementById('filter-status');
 		const type = document.getElementById('filter-type');
 
+		async function loadHistory() {
+			try {
+				const response = await fetch('/api/riwayat');
+				if (!response.ok) throw new Error('Gagal memuat riwayat');
+				const data = await response.json();
+				renderHistory(data);
+			} catch (error) {
+				console.error(error);
+				listEl.innerHTML = '<div class="empty">Gagal memuat riwayat. Muat ulang halaman.</div>';
+			}
+		}
+
+		function renderHistory(records) {
+			listEl.innerHTML = '';
+			if (!records || records.length === 0) {
+				listEl.innerHTML = '<div class="empty">Belum ada riwayat peminjaman.</div>';
+				return;
+			}
+			records.forEach(rec => {
+				const item = document.createElement('div');
+				item.className = 'record';
+				item.innerHTML = `
+					<img src="${rec.image_url || 'https://via.placeholder.com/400x300?text=Barang'}" alt="${rec.barang_name || 'Barang'}" />
+					<div class="meta">
+						<h3>${rec.barang_name || 'Barang'}</h3>
+						<p>Dipinjam: ${rec.borrow_date || '-'} — Dikembalikan: ${rec.return_date || 'Belum kembali'}</p>
+						<p>Jumlah: ${rec.quantity || 1} · Keterangan: ${rec.note || '-'}</p>
+					</div>
+					<div><div class="status ${rec.status && rec.status.toLowerCase().includes('selesai') ? 'completed' : 'pending'}">${rec.status || 'Dalam Proses'}</div></div>
+				`;
+				listEl.appendChild(item);
+			});
+			applyFilter();
+		}
+
 		function applyFilter(){
 			const term = q.value.toLowerCase();
 			const st = status.value;
-			const items = Array.from(listEl.querySelectorAll('.record'));
-			items.forEach(it => {
+			const ty = type.value;
+			Array.from(listEl.querySelectorAll('.record')).forEach(it => {
 				const text = it.innerText.toLowerCase();
 				let visible = true;
 				if(term && !text.includes(term)) visible = false;
-				if(st !== 'all'){
-					if(st === 'completed' && !it.querySelector('.status').classList.contains('completed')) visible = false;
-					if(st === 'pending' && !it.querySelector('.status').classList.contains('pending')) visible = false;
+				if(st !== 'all') {
+					const isCompleted = it.querySelector('.status').classList.contains('completed');
+					if(st === 'completed' && !isCompleted) visible = false;
+					if(st === 'pending' && isCompleted) visible = false;
 				}
+				if(ty !== 'all' && !text.includes(ty)) visible = false;
 				it.style.display = visible ? '' : 'none';
 			});
 		}
 
+		window.addEventListener('DOMContentLoaded', loadHistory);
 		q.addEventListener('input', applyFilter);
 		status.addEventListener('change', applyFilter);
 		type.addEventListener('change', applyFilter);

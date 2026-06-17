@@ -30,30 +30,61 @@
 					<h1 id="register-title">Buat Akun Baru</h1>
 					<p class="lead">Isi data akun untuk mulai menggunakan sistem peminjaman.</p>
 				</center>
-				<form id="register-form" onsubmit="event.preventDefault(); alert('Akun berhasil dibuat');">
-					<div class="form-group">
-						<label for="name">Nama Lengkap</label>
-						<input id="name" type="text" placeholder="Nama lengkap" required />
-					</div>
-					<div class="form-group">
-						<label for="register-email">Email</label>
-						<input id="register-email" type="email" placeholder="email@gmail.com" required />
-					</div>
-					<div class="form-group">
-						<label for="register-password">Kata sandi</label>
-						<input id="register-password" type="password" placeholder="••••••••" required />
-					</div>
-					<div class="form-group">
-						<label for="confirm-password">Ulangi kata sandi</label>
-						<input id="confirm-password" type="password" placeholder="••••••••" required />
-					</div>
-					<div class="form-group">
-						<button type="submit">Daftar Akun</button>
-					</div>
-					<div class="small">Sudah punya akun? <a href="login.html">Masuk</a></div>
-				</form>
-			</div>
-		</div>
-	</div>
+<form id="register-form">
+                    <div class="form-group">
+                        <label for="name">Nama Lengkap</label>
+                        <input id="name" type="text" placeholder="Nama lengkap" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input id="register-email" type="email" placeholder="email@gmail.com" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Kata sandi</label>
+                        <input id="register-password" type="password" placeholder="••••••••" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Ulangi kata sandi</label>
+                        <input id="confirm-password" type="password" placeholder="••••••••" required />
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Daftar Akun</button>
+                    </div>
+                    <div class="small">Sudah punya akun? <a href="login.html">Masuk</a></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            if (password !== confirmPassword) {
+                alert('Password harus sama.');
+                return;
+            }
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name, email, password})
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    alert('Pendaftaran berhasil. Silakan login.');
+                    window.location.href = 'login.html';
+                } else {
+                    alert(data.message || 'Gagal mendaftar.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan saat mendaftar. Coba lagi.');
+            }
+        });
+    </script>
 </body>
 </html>

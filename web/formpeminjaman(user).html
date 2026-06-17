@@ -84,14 +84,68 @@
 	</div>
 
 	<script>
-		function handleSubmit(e){
-			e.preventDefault();
-			const data = Object.fromEntries(new FormData(e.target).entries());
-			console.log('Form data:', data);
-			alert('Pengajuan dikirim. Cek konsol untuk data contoh.');
-			e.target.reset();
-		}
-	</script>
+        async function loadBarangOptions() {
+            const select = document.getElementById('barang');
+            try {
+                const response = await fetch('/api/barang');
+                if (!response.ok) {
+                    throw new Error('Gagal memuat daftar barang');
+                }
+                const data = await response.json();
+                select.innerHTML = '<option value="">-- Pilih barang --</option>';
+                data.forEach(item => {
+                    if (item.status && item.status.toLowerCase() === 'tersedia') {
+                        const option = document.createElement('option');
+                        option.value = item.id;
+                        option.textContent = item.name + ' (' + item.category + ')';
+                        select.appendChild(option);
+                    }
+                });
+            } catch (error) {
+                console.error(error);
+                select.innerHTML = '<option value="">Gagal memuat barang</option>';
+            }
+        }
+
+        async function handleSubmit(e){
+            e.preventDefault();
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            if (!currentUser) {
+                alert('Silakan login terlebih dahulu.');
+                window.location.href = 'login.html';
+                return;
+            }
+            const data = Object.fromEntries(new FormData(e.target).entries());
+            const payload = {
+                userId: currentUser.id,
+                barang_id: data.barang,
+                borrow_date: data.tanggal_pinjam,
+                return_date: data.tanggal_kembali,
+                quantity: parseInt(data.jumlah, 10) || 1,
+                note: data.alasan || '',
+                status: 'Dipinjam'
+            };
+            try {
+                const response = await fetch('/api/peminjaman', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    alert('Pengajuan peminjaman dikirim.');
+                    e.target.reset();
+                } else {
+                    alert(result.message || 'Gagal mengirim peminjaman.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan saat mengirim peminjaman.');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadBarangOptions);
+    </script>
 </body>
 </html>
 

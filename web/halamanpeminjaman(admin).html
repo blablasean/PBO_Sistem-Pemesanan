@@ -171,45 +171,102 @@ font-size: 1rem;
 </div>
 
 <script>
-const items = [
-{id: 1, title: 'Proyektor Panasonic', status: 'Tersedia', category: 'Elektronik', image: 'https://via.placeholder.com/400x300?text=Proyektor'},
-{id: 2, title: 'Laptop Dell', status: 'Dipinjam', category: 'Elektronik', image: 'https://via.placeholder.com/400x300?text=Laptop'},
-{id: 3, title: 'Meja Lipat', status: 'Tersedia', category: 'Furniture', image: 'https://via.placeholder.com/400x300?text=Meja'},
-];
+let items = [];
 
-function renderItems(filterCategory = 'all', filterStatus = 'all', search = '') {
-const list = document.getElementById('items');
-list.innerHTML = '';
-const normalizedSearch = search.toLowerCase();
-items.filter(item => {
-const matchesCategory = filterCategory === 'all' || item.category.toLowerCase() === filterCategory.toLowerCase();
-const matchesStatus = filterStatus === 'all' || item.status.toLowerCase() === filterStatus.toLowerCase();
-const matchesSearch = item.title.toLowerCase().includes(normalizedSearch);
-return matchesCategory && matchesStatus && matchesSearch;
-}).forEach(item => {
-const card = document.createElement('div');
-card.className = 'item';
-card.innerHTML = `
-<img src="${item.image}" alt="${item.title}" />
-<h3>${item.title}</h3>
-<p>Kategori: ${item.category}</p>
-<p>Status: ${item.status}</p>
-<div class="item-actions">
-<button type="button" class="primary" onclick="toggleBorrow(${item.id})" ${item.status === 'Dipinjam' ? 'disabled' : ''}>${item.status === 'Tersedia' ? 'Pinjam' : 'Tidak Tersedia'}</button>
-<button type="button" class="edit" onclick="editItem(${item.id})">Edit</button>
-<button type="button" class="delete" onclick="deleteItem(${item.id})">Hapus</button>
-</div>
-`;
-list.appendChild(card);
-});
+function getCurrentFilters() {
+    return {
+        category: document.getElementById('filter-category').value,
+        status: document.getElementById('filter-status').value,
+        search: document.getElementById('search-items').value.trim().toLowerCase(),
+    };
 }
 
-function currentFilters() {
-return {
-category: document.getElementById('filter-category').value,
-status: document.getElementById('filter-status').value,
-search: document.getElementById('search-items').value,
-};
+async function loadItems() {
+    try {
+        const response = await fetch('/api/barang');
+        if (!response.ok) throw new Error('Gagal memuat daftar barang');
+        items = await response.json();
+        renderItems();
+    } catch (error) {
+        console.error(error);
+        document.getElementById('items').innerHTML = '<p style="padding:24px;color:#b00020">Gagal memuat barang.</p>';
+    }
+}
+
+function renderItems() {
+    const {category, status, search} = getCurrentFilters();
+    const list = document.getElementById('items');
+    list.innerHTML = '';
+    const visible = items.filter(item => {
+        const matchesCategory = category === 'all' || item.category === category;
+        const matchesStatus = status === 'all' || item.status === status;
+        const matchesSearch = item.name.toLowerCase().includes(search) || item.category.toLowerCase().includes(search);
+        return matchesCategory && matchesStatus && matchesSearch;
+    });
+    if (visible.length === 0) {
+        list.innerHTML = '<p style="padding:24px;color:#555">Tidak ada barang sesuai filter.</p>';
+        return;
+    }
+    visible.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'item';
+        card.innerHTML = `
+            <img src="${item.image_url || 'https://via.placeholder.com/400x300?text=Barang'}" alt="${item.name}" />
+            <h3>${item.name}</h3>
+            <p>Kategori: ${item.category}</p>
+            <p>Status: ${item.status}</p>
+            <div class="item-actions">
+                <button type="button" class="primary" onclick="toggleBorrow('${item.id}')" ${item.status !== 'Tersedia' ? 'disabled' : ''}>${item.status === 'Tersedia' ? 'Pinjam' : 'Tidak Tersedia'}</button>
+                <button type="button" class="edit" onclick="openEditModal('${item.id}')">Edit</button>
+                <button type="button" class="delete" onclick="deleteItem('${item.id}')">Hapus</button>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
+
+async function addItem(event) {
+    event.preventDefault();
+    const title = document.getElementById('item-name').value.trim();
+    const category = document.getElementById('item-category').value;
+    const status = document.getElementById('item-status').value;
+    const image = document.getElementById('item-photo').value.trim() || 'https://via.placeholder.com/400x300?text=Barang+Baru';
+    if (!title) return;
+    try {
+        const response = await fetch('/api/barang', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: title, category, status, price: 0, image_url: image})
+        });
+        const result = await response.json();
+        if (response.ok && result.success) {
+            document.getElementById('add-item-form').reset();
+            loadItems();
+        } else {
+            alert(result.message || 'Gagal menambahkan barang.');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Terjadi kesalahan saat menambahkan barang.');
+    }
+}
+
+async function deleteItem(id) {
+    if (!confirm('Hapus barang dari inventaris?')) return;
+    try {
+        const response = await fetch('/api/barang/' + id, {
+            method: 'DELETE'
+        });
+        const result = await response.json();
+        if (response.ok && result.success) {
+            loadItems();
+        } else {
+            alert(result.message || 'Gagal menghapus barang.');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Terjadi kesalahan saat menghapus barang.');
+    }
 }
 
 let editingItemId = null;
@@ -222,98 +279,83 @@ const editPhotoInput = document.getElementById('edit-item-photo');
 const closeEditButton = document.getElementById('close-edit-modal');
 
 function openEditModal(id) {
-const item = items.find(item => item.id === id);
-if (!item) return;
-editingItemId = id;
-editNameInput.value = item.title;
-editCategoryInput.value = item.category;
-editStatusInput.value = item.status;
-editPhotoInput.value = item.image;
-editModal.classList.add('active');
-editModal.setAttribute('aria-hidden', 'false');
-editNameInput.focus();
+    const item = items.find(item => item.id === id);
+    if (!item) return;
+    editingItemId = id;
+    editNameInput.value = item.name;
+    editCategoryInput.value = item.category;
+    editStatusInput.value = item.status;
+    editPhotoInput.value = item.image_url || '';
+    editModal.classList.add('active');
+    editModal.setAttribute('aria-hidden', 'false');
+    editNameInput.focus();
 }
 
 function closeEditModal() {
-editingItemId = null;
-editModal.classList.remove('active');
-editModal.setAttribute('aria-hidden', 'true');
+    editingItemId = null;
+    editModal.classList.remove('active');
+    editModal.setAttribute('aria-hidden', 'true');
 }
 
 closeEditButton.addEventListener('click', closeEditModal);
 editModal.addEventListener('click', event => {
-if (event.target === editModal) {
-closeEditModal();
-}
+    if (event.target === editModal) {
+        closeEditModal();
+    }
 });
 
-document.getElementById('search-items').addEventListener('input', () => {
-const filters = currentFilters();
-renderItems(filters.category, filters.status, filters.search);
+editForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!editingItemId) return;
+    const title = editNameInput.value.trim();
+    const category = editCategoryInput.value;
+    const status = editStatusInput.value;
+    const image = editPhotoInput.value.trim() || 'https://via.placeholder.com/400x300?text=Barang';
+    try {
+        const response = await fetch('/api/barang/' + editingItemId, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: title, category, status, price: 0, image_url: image})
+        });
+        const result = await response.json();
+        if (response.ok && result.success) {
+            closeEditModal();
+            loadItems();
+        } else {
+            alert(result.message || 'Gagal memperbarui barang.');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Terjadi kesalahan saat memperbarui barang.');
+    }
 });
 
-document.getElementById('filter-category').addEventListener('change', () => {
-const filters = currentFilters();
-renderItems(filters.category, filters.status, filters.search);
-});
-
-document.getElementById('filter-status').addEventListener('change', () => {
-const filters = currentFilters();
-renderItems(filters.category, filters.status, filters.search);
-});
-
-document.getElementById('add-item-form').addEventListener('submit', event => {
-event.preventDefault();
-const title = document.getElementById('item-name').value.trim();
-const category = document.getElementById('item-category').value;
-const status = document.getElementById('item-status').value;
-const image = document.getElementById('item-photo').value.trim() || 'https://via.placeholder.com/400x300?text=Barang+Baru';
-if (!title) return;
-const nextId = items.length ? Math.max(...items.map(item => item.id)) + 1 : 1;
-items.unshift({id: nextId, title, category, status, image});
-document.getElementById('add-item-form').reset();
-const filters = currentFilters();
-renderItems(filters.category, filters.status, filters.search);
-});
-
-function deleteItem(id) {
-const item = items.find(item => item.id === id);
-if (!item) return;
-if (confirm(`Hapus barang "${item.title}" dari inventaris?`)) {
-const index = items.findIndex(item => item.id === id);
-items.splice(index, 1);
-const filters = currentFilters();
-renderItems(filters.category, filters.status, filters.search);
-}
-}
-
-function editItem(id) {
-openEditModal(id);
-}
-
-editForm.addEventListener('submit', event => {
-event.preventDefault();
-if (editingItemId === null) return;
-const item = items.find(item => item.id === editingItemId);
-if (!item) return;
-item.title = editNameInput.value.trim() || item.title;
-item.category = editCategoryInput.value.trim() || item.category;
-item.status = editStatusInput.value;
-item.image = editPhotoInput.value.trim() || item.image;
-closeEditModal();
-const filters = currentFilters();
-renderItems(filters.category, filters.status, filters.search);
-});
-
-function toggleBorrow(id) {
-const item = items.find(item => item.id === id);
-if (!item || item.status === 'Dipinjam') return;
-item.status = 'Dipinjam';
-const filters = currentFilters();
-renderItems(filters.category, filters.status, filters.search);
+async function toggleBorrow(id) {
+    const item = items.find(item => item.id === id);
+    if (!item || item.status !== 'Tersedia') return;
+    try {
+        const response = await fetch('/api/barang/' + id, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: item.name, category: item.category, status: 'Dipinjam', price: 0, image_url: item.image_url || 'https://via.placeholder.com/400x300?text=Barang'})
+        });
+        const result = await response.json();
+        if (response.ok && result.success) {
+            loadItems();
+        } else {
+            alert(result.message || 'Gagal memperbarui status barang.');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Terjadi kesalahan saat memperbarui status barang.');
+    }
 }
 
-renderItems();
+document.getElementById('search-items').addEventListener('input', renderItems);
+document.getElementById('filter-category').addEventListener('change', renderItems);
+document.getElementById('filter-status').addEventListener('change', renderItems);
+document.getElementById('add-item-form').addEventListener('submit', addItem);
+window.addEventListener('DOMContentLoaded', loadItems);
 </script>
 </body>
 </html>

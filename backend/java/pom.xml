@@ -10,7 +10,11 @@
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
     <dependencies>
-        <!-- No external dependencies required for plain Java classes -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.3.0</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -20,6 +24,14 @@
                 <version>3.11.0</version>
                 <configuration>
                     <release>17</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>com.example.backend.App</mainClass>
                 </configuration>
             </plugin>
         </plugins>
