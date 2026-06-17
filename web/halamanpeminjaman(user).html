@@ -2,91 +2,56 @@
 <html lang="id">
 <head>
 	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>Peminjaman Barang</title>
-	<style>
-		:root{--green:#3C8322;--card-radius:12px}
-		html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--green)}
-		.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
-		.panel{width:100%;max-width:1200px;background:#fff;border-radius:var(--card-radius);box-shadow:0 12px 30px rgba(0,0,0,.15);display:flex;gap:24px;overflow:hidden}
-		@media(max-width:920px){.panel{flex-direction:column}}
-		.sidebar{flex:0 0 360px;padding:28px;background:#f7f7f7}
-		.content{flex:1;padding:28px}
-		h1{margin:0 0 6px;font-size:22px;color:#0b3b03}
-		.controls{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
-		.search{flex:1;min-width:180px;padding:10px;border:1px solid #ddd;border-radius:8px}
-		.select{padding:10px;border:1px solid #ddd;border-radius:8px;background:#fff}
-		.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-		.item{background:#fff;border:1px solid #e6e6e6;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
-		.item img{width:100%;height:140px;object-fit:cover;border-radius:8px}
-		.item h3{margin:0;font-size:16px;color:#123}
-		.item p{margin:0;color:#555;font-size:13px}
-		.item button{margin-top:auto;padding:10px;border-radius:8px;border:none;background:var(--green);color:#fff;font-weight:700;cursor:pointer}
-		.img-placeholder{width:100%;border-radius:12px;border:2px solid #949494}
-	</style>
+	<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 	<div class="wrap">
 		<div class="panel" role="main" aria-labelledby="page-title">
 			<aside class="sidebar">
 				<h1 id="page-title">Peminjaman Barang</h1>
-				<p style="color:#3a5d2d;margin-top:6px">Pilih barang yang ingin dipinjam.</p>
-				<div style="margin-top:18px">
-					<label style="font-weight:600;color:#333">Filter Kategori</label>
-                    <select id="filter-category" class="select" aria-label="Filter kategori">
-                        <option value="all">Semua Kategori</option>
-                        <option value="Elektronik">Elektronik</option>
-                        <option value="Furniture">Furniture</option>
-                        <option value="Alat Tulis">Alat Tulis</option>
-                    </select>
-                </div>
-                <div style="margin-top:18px">
-                    <label style="font-weight:600;color:#333">Status</label>
-                    <select id="filter-status" class="select" aria-label="Filter status">
-                        <option value="all">Semua</option>
-                        <option value="Tersedia">Tersedia</option>
-                        <option value="Dipinjam">Dipinjam</option>
-                    </select>
-                </div>
-                <!--<div style="margin-top:22px">
-                    <img class="img-placeholder" src="https://api.builder.io/api/v1/image/assets/TEMP/96f73c6796eb28315c69d701053191074f15748c?width=1388" alt="Ilustrasi Peminjaman" />
-                </div>-->
-            </aside>
+				<p class="lead">Pilih barang yang ingin dipinjam dan ajukan permintaan secara cepat.</p>
+				<div class="form-group">
+					<label for="filter-category">Filter Kategori</label>
+					<select id="filter-category" class="select" aria-label="Filter kategori">
+						<option value="all">Semua Kategori</option>
+						<option value="Elektronik">Elektronik</option>
+						<option value="Furniture">Furniture</option>
+						<option value="Alat Tulis">Alat Tulis</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="filter-status">Status</label>
+					<select id="filter-status" class="select" aria-label="Filter status">
+						<option value="all">Semua</option>
+						<option value="Tersedia">Tersedia</option>
+						<option value="Dipinjam">Dipinjam</option>
+					</select>
+				</div>
+			</aside>
             <section class="content">
                 <div class="controls">
-                    <input id="search-items" class="search" type="search" placeholder="Cari barang..." aria-label="Cari barang" />
+                    <input id="search-items" class="input" type="search" placeholder="Cari barang..." aria-label="Cari barang" />
                     <select id="sort-items" class="select" aria-label="Urutkan">
                         <option value="latest">Urutkan: Terbaru</option>
                         <option value="available">Hanya Tersedia</option>
                         <option value="borrowed">Hanya Dipinjam</option>
                     </select>
-                    <button type="button" class="btn-history" onclick="showHistory()">Lihat Riwayat</button>
-                    <button type="button" class="btn-logout" onclick="logout()">Logout</button>
+                    <button type="button" id="show-history-button" class="btn btn-secondary">Lihat Riwayat</button>
+                    <button type="button" id="logout-button" class="btn btn-danger">Logout</button>
                 </div>
                 <div class="items" id="items"></div>
 
                     <!-- History modal -->
                     <div id="history-modal" class="modal" aria-hidden="true">
                         <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="history-modal-title">
-                            <button class="modal-close" aria-label="Tutup" onclick="closeHistory()">×</button>
+                            <button id="close-history-button" class="modal-close" aria-label="Tutup">×</button>
                             <h2 id="history-modal-title">Riwayat Peminjaman</h2>
                             <div id="history-container"><div class="modal-loading">Memuat...</div></div>
                         </div>
                     </div>
 
-                    <style>
-                        /* Modal styles */
-                        .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);z-index:1200}
-                        .modal[data-open="true"]{display:flex}
-                        .modal-content{position:relative;background:#fff;border-radius:12px;padding:20px;max-width:1000px;width:95%;max-height:80vh;overflow:auto}
-                        .modal-close{position:absolute;right:12px;top:8px;background:none;border:0;font-size:24px;line-height:1;cursor:pointer}
-                        .modal-loading{padding:30px;text-align:center;color:#555}
-                        .modal-error{padding:20px;color:#b00020}
-                        .btn-history{padding:10px 12px;border-radius:8px;border:none;background:#fff;color:#0b3b03;border:1px solid #d0d0d0;cursor:pointer}
-                        .btn-history:hover{background:#f3f3f3}
-                        .btn-logout{padding:10px 12px;border-radius:8px;border:none;background:#d9534f;color:#fff;cursor:pointer}
-                        .btn-logout:hover{background:#c9302c}
-                    </style>
 
                     <script>
                         let items = [];
@@ -95,11 +60,13 @@
                         const searchInput = document.getElementById('search-items');
                         const categoryFilter = document.getElementById('filter-category');
                         const statusFilter = document.getElementById('filter-status');
+                        const sortSelect = document.getElementById('sort-items');
+                        const historyModal = document.getElementById('history-modal');
+                        const historyContainer = document.getElementById('history-container');
 
                         if (!currentUser) {
                             window.location.href = 'login.html';
-                        }
-                        if (currentUser && currentUser.role && currentUser.role.toLowerCase() === 'admin') {
+                        } else if (currentUser.role && currentUser.role.toLowerCase() === 'admin') {
                             window.location.href = 'halamanpeminjaman(admin).html';
                         }
 
@@ -111,28 +78,42 @@
                                 renderItems();
                             } catch (error) {
                                 console.error(error);
-                                itemList.innerHTML = '<p style="padding:24px;color:#b00020">Gagal memuat data barang.</p>';
+                                itemList.innerHTML = '<div class="empty-state">Gagal memuat data barang.</div>';
                             }
                         }
 
-                        function renderItems() {
+                        function getFilteredItems() {
                             const filterCategory = categoryFilter.value;
                             const filterStatus = statusFilter.value;
                             const search = searchInput.value.trim().toLowerCase();
-                            itemList.innerHTML = '';
-
-                            const visibleItems = items.filter(item => {
+                            return items.filter(item => {
                                 const matchesCategory = filterCategory === 'all' || item.category === filterCategory;
                                 const matchesStatus = filterStatus === 'all' || item.status === filterStatus;
                                 const matchesSearch = item.name.toLowerCase().includes(search) || item.category.toLowerCase().includes(search);
                                 return matchesCategory && matchesStatus && matchesSearch;
                             });
+                        }
 
+                        function sortItems(filteredItems) {
+                            const sortValue = sortSelect.value;
+                            return filteredItems.slice().sort((a, b) => {
+                                if (sortValue === 'available') {
+                                    return (a.status === 'Tersedia' ? -1 : 1) - (b.status === 'Tersedia' ? -1 : 1);
+                                }
+                                if (sortValue === 'borrowed') {
+                                    return (a.status === 'Dipinjam' ? -1 : 1) - (b.status === 'Dipinjam' ? -1 : 1);
+                                }
+                                return 0;
+                            });
+                        }
+
+                        function renderItems() {
+                            const visibleItems = sortItems(getFilteredItems());
+                            itemList.innerHTML = '';
                             if (visibleItems.length === 0) {
-                                itemList.innerHTML = '<p style="padding:24px;color:#555">Tidak ada barang sesuai filter.</p>';
+                                itemList.innerHTML = '<div class="empty-state">Tidak ada barang sesuai filter.</div>';
                                 return;
                             }
-
                             visibleItems.forEach(item => {
                                 const card = document.createElement('div');
                                 card.className = 'item';
@@ -142,8 +123,12 @@
                                     <h3>${item.name}</h3>
                                     <p>Kategori: ${item.category}</p>
                                     <p>Status: ${item.status}</p>
-                                    <button type="button" ${item.status !== 'Tersedia' ? 'disabled' : ''} onclick="openBorrowForm('${item.id}')">${item.status === 'Tersedia' ? 'Ajukan Peminjaman' : 'Tidak Tersedia'}</button>
+                                    <button type="button" class="btn btn-primary" ${item.status !== 'Tersedia' ? 'disabled' : ''} data-id="${item.id}">
+                                        ${item.status === 'Tersedia' ? 'Ajukan Peminjaman' : 'Tidak Tersedia'}
+                                    </button>
                                 `;
+                                const actionButton = card.querySelector('button');
+                                actionButton.addEventListener('click', () => openBorrowForm(item.id));
                                 itemList.appendChild(card);
                             });
                         }
@@ -153,91 +138,48 @@
                             window.location.href = 'formpeminjaman(user).html';
                         }
 
-                        async function showHistory(){
-                            const modal = document.getElementById('history-modal');
-                            const container = document.getElementById('history-container');
-                            container.innerHTML = '<div class="modal-loading">Memuat...</div>';
-                            modal.setAttribute('data-open','true');
-                            try{
-                                const res = await fetch('/api/riwayat', {cache: 'no-store'});
-                                if (res.ok) {
-                                    const data = await res.json();
-                                    renderHistoryFromJson(container, data.filter(rec => String(rec.user_id) === String(currentUser.id)));
-                                    return;
-                                }
-                                throw new Error('API gagal');
-                            }catch(err){
-                                console.error(err);
-                                const fallback = await fetch('riwayat(user).html');
-                                if(fallback.ok){
-                                    const text = await fallback.text();
-                                    const parser = new DOMParser();
-                                    const doc = parser.parseFromString(text,'text/html');
-                                    const list = doc.getElementById('list') || doc.body;
-                                    container.innerHTML = '';
-                                    container.appendChild(document.importNode(list, true));
-                                } else {
-                                    container.innerHTML = '<div class="modal-error">Gagal memuat riwayat. Buka halaman riwayat secara langsung.</div>';
-                                }
+                        async function showHistory() {
+                            historyContainer.innerHTML = '<div class="empty-state">Memuat riwayat...</div>';
+                            historyModal.classList.add('active');
+                            try {
+                                const response = await fetch('/api/riwayat', { cache: 'no-store' });
+                                if (!response.ok) throw new Error('Gagal memuat riwayat');
+                                const history = await response.json();
+                                renderHistory(history.filter(rec => String(rec.user_id) === String(currentUser.id)));
+                            } catch (error) {
+                                console.error(error);
+                                historyContainer.innerHTML = '<div class="empty-state">Gagal memuat riwayat. Coba lagi nanti.</div>';
                             }
                         }
 
-                        function renderHistoryFromJson(container, data){
-                            container.innerHTML = '';
-                            if(!Array.isArray(data) || data.length === 0){
-                                container.innerHTML = '<div class="modal-loading">Belum ada riwayat.</div>';
+                        function renderHistory(records) {
+                            historyContainer.innerHTML = '';
+                            if (!records.length) {
+                                historyContainer.innerHTML = '<div class="empty-state">Belum ada riwayat peminjaman.</div>';
                                 return;
                             }
                             const list = document.createElement('div');
-                            list.style.display = 'flex';
-                            list.style.flexDirection = 'column';
-                            list.style.gap = '12px';
-                            data.forEach(rec => {
-                                const row = document.createElement('div');
-                                row.style.display = 'flex';
-                                row.style.gap = '12px';
-                                row.style.alignItems = 'center';
-                                const img = document.createElement('img');
-                                img.src = rec.image_data || rec.image_url || ('https://via.placeholder.com/400x300?text=' + encodeURIComponent(rec.barang_name || 'Item'));
-                                img.alt = rec.barang_name || 'Item';
-                                img.style.width = '120px';
-                                img.style.height = '80px';
-                                img.style.objectFit = 'cover';
-                                img.style.borderRadius = '8px';
-                                img.style.flex = '0 0 120px';
-                                const meta = document.createElement('div');
-                                meta.style.flex = '1';
-                                const h = document.createElement('div');
-                                h.style.fontWeight = '700';
-                                h.textContent = rec.barang_name || 'Barang';
-                                const p1 = document.createElement('div');
-                                p1.style.color = '#666';
-                                p1.style.fontSize = '13px';
-                                p1.textContent = `Dipinjam: ${rec.borrow_date || '-'} — Dikembalikan: ${rec.return_date || 'Belum kembali'}`;
-                                const p2 = document.createElement('div');
-                                p2.style.color = '#666';
-                                p2.style.fontSize = '13px';
-                                p2.textContent = `Jumlah: ${rec.quantity || 1} · Keterangan: ${rec.note || '-'}`;
-                                meta.appendChild(h);
-                                meta.appendChild(p1);
-                                meta.appendChild(p2);
-                                const status = document.createElement('div');
-                                status.style.padding = '6px 10px';
-                                status.style.borderRadius = '8px';
-                                status.style.fontWeight = '700';
-                                status.style.background = '#fff4e6';
-                                status.style.color = '#b76e00';
-                                status.textContent = rec.status || 'Dalam Proses';
-                                row.appendChild(img);
-                                row.appendChild(meta);
-                                row.appendChild(status);
-                                list.appendChild(row);
+                            list.className = 'items';
+                            records.forEach(rec => {
+                                const card = document.createElement('div');
+                                card.className = 'item';
+                                const imageSrc = rec.image_data || rec.image_url || 'https://via.placeholder.com/400x300?text=Barang';
+                                const statusClass = rec.status && rec.status.toLowerCase().includes('selesai')
+                                    ? 'status-completed' : 'status-pending';
+                                card.innerHTML = `
+                                    <img src="${imageSrc}" alt="${rec.barang_name || 'Barang'}" />
+                                    <h3>${rec.barang_name || 'Barang'}</h3>
+                                    <p>Dipinjam: ${rec.borrow_date || '-'} — Dikembalikan: ${rec.return_date || 'Belum kembali'}</p>
+                                    <p>Jumlah: ${rec.quantity || 1} · Keterangan: ${rec.note || '-'}</p>
+                                    <span class="status-pill ${statusClass}">${rec.status || 'Dalam Proses'}</span>
+                                `;
+                                list.appendChild(card);
                             });
-                            container.appendChild(list);
+                            historyContainer.appendChild(list);
                         }
 
-                        function closeHistory(){
-                            document.getElementById('history-modal').removeAttribute('data-open');
+                        function closeHistory() {
+                            historyModal.classList.remove('active');
                         }
 
                         function logout() {
@@ -246,14 +188,19 @@
                             window.location.href = 'login.html';
                         }
 
-                        document.addEventListener('click', function(e){
-                            const modal = document.getElementById('history-modal');
-                            if(modal.getAttribute('data-open') === 'true' && e.target === modal){ closeHistory(); }
+                        document.addEventListener('click', event => {
+                            if (event.target === historyModal) {
+                                closeHistory();
+                            }
                         });
 
+                        document.getElementById('close-history-button').addEventListener('click', closeHistory);
+                        document.getElementById('show-history-button').addEventListener('click', showHistory);
+                        document.getElementById('logout-button').addEventListener('click', logout);
                         searchInput.addEventListener('input', renderItems);
                         categoryFilter.addEventListener('change', renderItems);
                         statusFilter.addEventListener('change', renderItems);
+                        sortSelect.addEventListener('change', renderItems);
                         window.addEventListener('DOMContentLoaded', loadItems);
                     </script>
                 </div>

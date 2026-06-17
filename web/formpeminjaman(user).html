@@ -1,84 +1,54 @@
 <!doctype html>
 <html lang="id">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width,initial-scale=1" />
-	<title>Form Peminjaman</title>
-	<style>
-		:root{--green:#3C8322;--card-radius:12px}
-		html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--green)}
-		.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
-		.card{width:100%;max-width:1000px;background:#fff;border-radius:var(--card-radius);box-shadow:0 12px 30px rgba(0,0,0,.12);display:grid;grid-template-columns:1fr 420px;gap:24px;overflow:hidden}
-		@media(max-width:900px){.card{grid-template-columns:1fr;padding:18px}}
-		.form{padding:32px}
-		.side{background:#f7f7f7;padding:24px;display:flex;flex-direction:column;gap:12px;align-items:center}
-		h1{margin:0 0 8px;color:#0b3b03}
-		label{display:block;margin:10px 0 6px;font-weight:600;color:#333}
-		input,select,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px}
-		textarea{min-height:100px}
-		.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-		.actions{margin-top:16px;display:flex;gap:12px}
-		button{padding:10px 14px;border-radius:8px;border:none;background:var(--green);color:#fff;font-weight:700;cursor:pointer}
-		.secondary{background:#e6e6e6;color:#333}
-		.logout-button{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:none;border-radius:8px;background:#d9534f;color:#fff;font-weight:700;cursor:pointer;margin:12px 0}
-		.illustration{width:100%;border-radius:10px;border:2px solid #949494}
-		.note{font-size:13px;color:#555;text-align:center}
-	</style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Form Peminjaman</title>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-	<div class="wrap">
-		<div class="card" role="main" aria-labelledby="form-title">
-			<form class="form" id="borrow-form">
-				<div class="section">
-					<h1 id="form-title">Ajukan Peminjaman</h1>
-					<p class="note">Pilih barang yang tersedia dan kirim permintaan peminjaman.</p>
-					<button type="button" class="logout-button" onclick="logout()">Logout</button>
-				</div>
+    <main class="page-wrapper">
+        <article class="page-card two-column" role="main" aria-labelledby="form-title">
+            <section class="page-grid">
+                <header>
+                    <h1 id="form-title" class="page-title">Ajukan Peminjaman</h1>
+                    <p class="lead">Pilih barang yang tersedia dan kirim permintaan peminjaman.</p>
+                </header>
+                <button type="button" class="btn btn-danger" id="logout-button">Logout</button>
+                <section id="user-info" class="info-card"></section>
+                <div class="form-group">
+                    <label for="barang">Pilih Barang</label>
+                    <select id="barang" name="barang" class="select" required>
+                        <option value="">-- Pilih barang yang tersedia --</option>
+                    </select>
+                </div>
+                <div class="section-row">
+                    <div class="form-group">
+                        <label for="tanggal_pinjam">Tanggal Pinjam</label>
+                        <input id="tanggal_pinjam" name="tanggal_pinjam" class="input" type="date" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="tanggal_kembali">Tanggal Kembali</label>
+                        <input id="tanggal_kembali" name="tanggal_kembali" class="input" type="date" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="jumlah">Jumlah</label>
+                    <input id="jumlah" name="jumlah" class="input" type="number" min="1" value="1" required />
+                </div>
+                <div class="form-group">
+                    <label for="alasan">Keterangan / Tujuan</label>
+                    <textarea id="alasan" name="alasan" class="textarea" placeholder="Contoh: Peminjaman untuk tugas instansi" required></textarea>
+                </div>
+                <div class="section-row">
+                    <button type="submit" class="btn btn-primary" form="borrow-form">Kirim Permintaan</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-button">Kembali</button>
+                </div>
+            </section>
+        </article>
+    </main>
 
-				<div class="info-box" id="user-info"></div>
-
-				<div class="section">
-					<label for="barang">Pilih Barang</label>
-					<select id="barang" name="barang" required>
-						<option value="">-- Pilih barang yang tersedia --</option>
-					</select>
-				</div>
-
-				<div class="row">
-					<div>
-						<label for="tanggal_pinjam">Tanggal Pinjam</label>
-						<input id="tanggal_pinjam" name="tanggal_pinjam" type="date" required />
-					</div>
-					<div>
-						<label for="tanggal_kembali">Tanggal Kembali</label>
-						<input id="tanggal_kembali" name="tanggal_kembali" type="date" required />
-					</div>
-				</div>
-
-				<div class="section">
-					<label for="jumlah">Jumlah</label>
-					<input id="jumlah" name="jumlah" type="number" min="1" value="1" required />
-				</div>
-
-				<div class="section">
-					<label for="alasan">Keterangan / Tujuan</label>
-					<textarea id="alasan" name="alasan" placeholder="Contoh: Peminjaman untuk tugas instansi" required></textarea>
-				</div>
-
-				<div class="actions">
-					<button type="submit">Kirim Permintaan</button>
-					<button type="button" class="secondary" onclick="window.location.href='halamanpeminjaman(user).html'">Kembali</button>
-				</div>
-			</form>
-
-			<!--<aside class="side" aria-hidden="true">
-				<img class="illustration" src="https://api.builder.io/api/v1/image/assets/TEMP/fa6187e7d32f2d9783fcfef4222bb3decc54d6de?width=1303" alt="Ilustrasi Form Peminjaman" />
-				<div class="note">Periksa kembali data sebelum mengajukan. Hubungi admin jika butuh bantuan.</div>
-			</aside>-->
-		</div>
-	</div>
-
-	<script>
+    <script>
         async function loadBarangOptions() {
             const select = document.getElementById('barang');
             try {
@@ -122,7 +92,7 @@
                 window.location.href = 'login.html';
                 return;
             }
-            const form = event.currentTarget;
+            const form = document.getElementById('borrow-form');
             const data = Object.fromEntries(new FormData(form).entries());
             const payload = {
                 userId: currentUser.id,
@@ -136,7 +106,7 @@
             try {
                 const response = await fetch('/api/peminjaman', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 const result = await response.json();
@@ -170,6 +140,8 @@
                 document.getElementById('barang').value = selectedItemId;
             }
             document.getElementById('borrow-form').addEventListener('submit', handleSubmit);
+            document.getElementById('logout-button').addEventListener('click', logout);
+            document.getElementById('cancel-button').addEventListener('click', () => { window.location.href = 'halamanpeminjaman(user).html'; });
         });
     </script>
 </body>

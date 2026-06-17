@@ -1,137 +1,119 @@
 <!doctype html>
 <html lang="id">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width,initial-scale=1" />
-	<title>Riwayat Pemesanan</title>
-	<style>
-		:root{--green:#3C8322}
-		html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:var(--green)}
-		.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
-		.card{width:100%;max-width:1100px;background:#fff;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.12);padding:20px}
-		h1{margin:0 0 8px;color:#0b3b03}
-		.filters{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
-		.filters input,.filters select{padding:10px;border:1px solid #ddd;border-radius:8px}
-		.list{margin-top:16px;border-top:1px solid #eee}
-		.record{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f3f3f3}
-		.record img{width:90px;height:64px;object-fit:cover;border-radius:8px;border:1px solid #e6e6e6}
-		.btn-logout{padding:10px 14px;border-radius:8px;border:none;background:#d9534f;color:#fff;cursor:pointer;margin:16px 0;}
-		.btn-logout:hover{background:#c9302c}
-		.meta{flex:1}
-		.meta h3{margin:0;font-size:16px}
-		.meta p{margin:4px 0;color:#666;font-size:13px}
-		.status{padding:6px 10px;border-radius:8px;font-weight:700}
-		.status.completed{background:#e6f8e9;color:#0b3b03}
-		.status.pending{background:#fff4e6;color:#b76e00}
-		.empty{padding:40px;text-align:center;color:#666}
-		.illustration{width:100%;border-radius:12px;border:2px solid #949494;margin-top:12px}
-	</style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Riwayat Pemesanan</title>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-	<div class="wrap">
-		<div class="card" role="main" aria-labelledby="history-title">
-			<h1 id="history-title">Riwayat Pemesanan</h1>
-			<p style="margin:0;color:#355d2a">Lihat riwayat peminjaman atau pemesanan barang Anda.</p>
-			<button type="button" class="btn-logout" onclick="logout()">Logout</button>
+    <main class="page-wrapper">
+        <article class="page-card form-card" role="main" aria-labelledby="history-title">
+            <header>
+                <h1 id="history-title" class="page-title">Riwayat Pemesanan</h1>
+                <p class="lead">Lihat riwayat peminjaman atau pemesanan barang Anda.</p>
+            </header>
+            <div class="controls">
+                <button type="button" class="btn btn-danger" id="logout-button">Logout</button>
+            </div>
+            <div class="filters">
+                <input type="search" id="q" class="input" placeholder="Cari..." />
+                <select id="filter-status" class="select">
+                    <option value="all">Semua Status</option>
+                    <option value="completed">Selesai</option>
+                    <option value="pending">Dalam Proses</option>
+                </select>
+                <select id="filter-type" class="select">
+                    <option value="all">Semua Kategori</option>
+                    <option value="elektronik">Elektronik</option>
+                    <option value="furniture">Furniture</option>
+                </select>
+            </div>
+            <div class="page-grid" id="list">
+                <div class="empty-state">Memuat riwayat...</div>
+            </div>
+        </article>
+    </main>
 
-			<div class="filters">
-				<input type="search" id="q" placeholder="Cari..." />
-				<select id="filter-status">
-					<option value="all">Semua Status</option>
-					<option value="completed">Selesai</option>
-					<option value="pending">Dalam Proses</option>
-				</select>
-				<select id="filter-type">
-					<option value="all">Semua Kategori</option>
-					<option value="elektronik">Elektronik</option>
-					<option value="furniture">Furniture</option>
-				</select>
-			</div>
+    <script>
+        const listEl = document.getElementById('list');
+        const q = document.getElementById('q');
+        const status = document.getElementById('filter-status');
+        const type = document.getElementById('filter-type');
 
-			<div class="list" id="list">
-			<div class="empty">Memuat riwayat...</div>
+        async function loadHistory() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            try {
+                const response = await fetch('/api/riwayat');
+                if (!response.ok) throw new Error('Gagal memuat riwayat');
+                const data = await response.json();
+                const userHistory = data.filter(item => String(item.user_id) === String(currentUser.id));
+                renderHistory(userHistory);
+            } catch (error) {
+                console.error(error);
+                listEl.innerHTML = '<div class="empty-state">Gagal memuat riwayat. Muat ulang halaman.</div>';
+            }
+        }
 
-			<!-- <img class="illustration" src="https://api.builder.io/api/v1/image/assets/TEMP/5c36e7bc36cb5b2c102bbdaaa645078e0c08b138?width=1303" alt="Ilustrasi Riwayat Pemesanan" /> -->
+        function renderHistory(records) {
+            listEl.innerHTML = '';
+            if (!records || records.length === 0) {
+                listEl.innerHTML = '<div class="empty-state">Belum ada riwayat peminjaman.</div>';
+                return;
+            }
+            records.forEach(rec => {
+                const item = document.createElement('div');
+                item.className = 'record';
+                const statusClass = rec.status && rec.status.toLowerCase().includes('selesai') ? 'status-completed' : 'status-pending';
+                item.innerHTML = `
+                    <img src="${rec.image_data || rec.image_url || 'https://via.placeholder.com/400x300?text=Barang'}" alt="${rec.barang_name || 'Barang'}" />
+                    <div class="meta">
+                        <h3>${rec.barang_name || 'Barang'}</h3>
+                        <p>Dipinjam: ${rec.borrow_date || '-'} — Dikembalikan: ${rec.return_date || 'Belum kembali'}</p>
+                        <p>Jumlah: ${rec.quantity || 1} · Keterangan: ${rec.note || '-'}</p>
+                    </div>
+                    <div><span class="status-pill ${statusClass}">${rec.status || 'Dalam Proses'}</span></div>
+                `;
+                listEl.appendChild(item);
+            });
+            applyFilter();
+        }
 
-		</div>
-	</div>
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
 
-	<script>
-		const listEl = document.getElementById('list');
-		const q = document.getElementById('q');
-		const status = document.getElementById('filter-status');
-		const type = document.getElementById('filter-type');
+        function applyFilter() {
+            const term = q.value.toLowerCase();
+            const st = status.value;
+            const ty = type.value;
+            Array.from(listEl.querySelectorAll('.record')).forEach(it => {
+                const text = it.innerText.toLowerCase();
+                let visible = true;
+                if (term && !text.includes(term)) visible = false;
+                if (st !== 'all') {
+                    const isCompleted = it.querySelector('.status-pill').classList.contains('status-completed');
+                    if (st === 'completed' && !isCompleted) visible = false;
+                    if (st === 'pending' && isCompleted) visible = false;
+                }
+                if (ty !== 'all' && !text.includes(ty)) visible = false;
+                it.style.display = visible ? '' : 'none';
+            });
+        }
 
-		async function loadHistory() {
-			const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-			if (!currentUser) {
-				window.location.href = 'login.html';
-				return;
-			}
-
-			try {
-				const response = await fetch('/api/riwayat');
-				if (!response.ok) throw new Error('Gagal memuat riwayat');
-				const data = await response.json();
-				const userHistory = data.filter(item => String(item.user_id) === String(currentUser.id));
-				renderHistory(userHistory);
-			} catch (error) {
-				console.error(error);
-				listEl.innerHTML = '<div class="empty">Gagal memuat riwayat. Muat ulang halaman.</div>';
-			}
-		}
-
-		function renderHistory(records) {
-			listEl.innerHTML = '';
-			if (!records || records.length === 0) {
-				listEl.innerHTML = '<div class="empty">Belum ada riwayat peminjaman.</div>';
-				return;
-			}
-			records.forEach(rec => {
-				const item = document.createElement('div');
-				item.className = 'record';
-				item.innerHTML = `
-					<img src="${rec.image_data || rec.image_url || 'https://via.placeholder.com/400x300?text=Barang'}" alt="${rec.barang_name || 'Barang'}" />
-					<div class="meta">
-						<h3>${rec.barang_name || 'Barang'}</h3>
-						<p>Dipinjam: ${rec.borrow_date || '-'} — Dikembalikan: ${rec.return_date || 'Belum kembali'}</p>
-						<p>Jumlah: ${rec.quantity || 1} · Keterangan: ${rec.note || '-'}</p>
-					</div>
-					<div><div class="status ${rec.status && rec.status.toLowerCase().includes('selesai') ? 'completed' : 'pending'}">${rec.status || 'Dalam Proses'}</div></div>
-				`;
-				listEl.appendChild(item);
-			});
-			applyFilter();
-		}
-
-		function logout() {
-			localStorage.removeItem('currentUser');
-			window.location.href = 'login.html';
-		}
-
-		function applyFilter(){
-			const term = q.value.toLowerCase();
-			const st = status.value;
-			const ty = type.value;
-			Array.from(listEl.querySelectorAll('.record')).forEach(it => {
-				const text = it.innerText.toLowerCase();
-				let visible = true;
-				if(term && !text.includes(term)) visible = false;
-				if(st !== 'all') {
-					const isCompleted = it.querySelector('.status').classList.contains('completed');
-					if(st === 'completed' && !isCompleted) visible = false;
-					if(st === 'pending' && isCompleted) visible = false;
-				}
-				if(ty !== 'all' && !text.includes(ty)) visible = false;
-				it.style.display = visible ? '' : 'none';
-			});
-		}
-
-		window.addEventListener('DOMContentLoaded', loadHistory);
-		q.addEventListener('input', applyFilter);
-		status.addEventListener('change', applyFilter);
-		type.addEventListener('change', applyFilter);
-	</script>
+        window.addEventListener('DOMContentLoaded', () => {
+            loadHistory();
+            q.addEventListener('input', applyFilter);
+            status.addEventListener('change', applyFilter);
+            type.addEventListener('change', applyFilter);
+            document.getElementById('logout-button').addEventListener('click', logout);
+        });
+    </script>
 </body>
 </html>
 
