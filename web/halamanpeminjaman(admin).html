@@ -161,20 +161,32 @@ function renderItems() {
         const card = document.createElement('div');
         card.className = 'item';
         const imageSrc = item.image_data || item.image_url || 'https://via.placeholder.com/400x300?text=Barang';
+        const borrowDisabled = item.status !== 'Tersedia' ? 'disabled' : '';
         card.innerHTML = `
             <img src="${imageSrc}" alt="${item.name}" />
             <h3>${item.name}</h3>
             <p>Kategori: ${item.category}</p>
             <p>Status: ${item.status}</p>
             <div class="item-actions">
-                <button type="button" class="btn btn-primary" onclick="toggleBorrow('${item.id}')" ${item.status !== 'Tersedia' ? 'disabled' : ''}>${item.status === 'Tersedia' ? 'Pinjam' : 'Tidak Tersedia'}</button>
-                <button type="button" class="btn btn-secondary" onclick="openEditModal('${item.id}')">Edit</button>
-                <button type="button" class="btn btn-danger" onclick="deleteItem('${item.id}')">Hapus</button>
+                <button type="button" class="btn btn-primary" data-action="toggleBorrow" data-id="${item.id}" ${borrowDisabled}>${item.status === 'Tersedia' ? 'Pinjam' : 'Tidak Tersedia'}</button>
+                <button type="button" class="btn btn-secondary" data-action="edit" data-id="${item.id}">Edit</button>
+                <button type="button" class="btn btn-danger" data-action="delete" data-id="${item.id}">Hapus</button>
             </div>
         `;
         list.appendChild(card);
     });
 }
+
+const itemsContainer = document.getElementById('items');
+itemsContainer.addEventListener('click', event => {
+    const button = event.target.closest('button[data-action]');
+    if (!button) return;
+    const action = button.dataset.action;
+    const id = button.dataset.id;
+    if (action === 'toggleBorrow') return toggleBorrow(id);
+    if (action === 'edit') return openEditModal(id);
+    if (action === 'delete') return deleteItem(id);
+});
 
 async function readImageFile(file) {
     return new Promise((resolve, reject) => {
