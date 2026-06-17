@@ -1,5 +1,7 @@
 package com.example.backend;
 
+import java.util.Map;
+
 public class Kamera extends Barang {
     private final double megapixel;
     private final String resolusi;
@@ -31,6 +33,14 @@ public class Kamera extends Barang {
     @Override
     public String getCategory() {
         return "Kamera";
+    }
+
+    @Override
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = super.toMap();
+        map.put("megapixel", megapixel);
+        map.put("resolusi", resolusi);
+        return map;
     }
 
     @Override

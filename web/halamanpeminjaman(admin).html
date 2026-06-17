@@ -10,8 +10,11 @@
     <main class="page-wrapper">
         <article class="page-card" role="main" aria-labelledby="admin-title">
             <header>
-                <h1 id="admin-title" class="page-title">Admin Peminjaman</h1>
-                <p class="lead">Tambah barang inventaris dan kelola daftar peminjaman.</p>
+                <div class="header-info">
+                    <h1 id="admin-title" class="page-title">Admin Peminjaman</h1>
+                    <p class="lead">Tambah barang inventaris dan kelola daftar peminjaman.</p>
+                </div>
+                <button type="button" class="btn btn-danger" id="logout-button" style="margin-top: 8px;">Logout</button>
             </header>
             <div class="page-grid">
                 <aside class="panel">
@@ -38,11 +41,31 @@
                         <label for="item-name">Nama Barang</label>
                         <input id="item-name" class="input" type="text" placeholder="Contoh: Kamera Sony" required />
 
+                        <label for="item-merk">Merk</label>
+                        <input id="item-merk" class="input" type="text" placeholder="Contoh: Sony / Yamaha" required />
+
+                        <label for="item-price">Harga Sewa per Hari (Rp)</label>
+                        <input id="item-price" class="input" type="number" placeholder="Contoh: 150000" required />
+
                         <label for="item-category">Kategori</label>
                         <select id="item-category" class="select">
                             <option value="Kamera">Kamera</option>
                             <option value="Motor">Motor</option>
                         </select>
+
+                        <div id="kamera-fields" style="display: grid; gap: 16px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa;">
+                            <label for="item-megapixel">Megapixel (MP)</label>
+                            <input id="item-megapixel" class="input" type="number" step="0.1" placeholder="Contoh: 24.2" />
+                            <label for="item-resolusi">Resolusi Video</label>
+                            <input id="item-resolusi" class="input" type="text" placeholder="Contoh: 4K" />
+                        </div>
+
+                        <div id="motor-fields" style="display: none; gap: 16px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa;">
+                            <label for="item-cc">Kapasitas Mesin (CC)</label>
+                            <input id="item-cc" class="input" type="number" placeholder="Contoh: 150" />
+                            <label for="item-tipe">Tipe Motor</label>
+                            <input id="item-tipe" class="input" type="text" placeholder="Contoh: Matic" />
+                        </div>
 
                         <label for="item-status">Status Barang</label>
                         <select id="item-status" class="select">
@@ -64,8 +87,6 @@
                             <option value="available">Urutkan: Tersedia</option>
                             <option value="borrowed">Urutkan: Dipinjam</option>
                         </select>
-                        <button type="button" class="btn btn-secondary" onclick="window.location.href='riwayat.html'">Riwayat Peminjaman</button>
-                        <button type="button" class="btn btn-danger" id="logout-button">Logout</button>
                     </div>
                     <div class="items" id="items">
                         <div class="empty-state">Memuat daftar barang...</div>
@@ -81,11 +102,31 @@
                         <label for="edit-item-name">Nama Barang</label>
                         <input id="edit-item-name" class="input" type="text" required />
 
+                        <label for="edit-item-merk">Merk</label>
+                        <input id="edit-item-merk" class="input" type="text" required />
+
+                        <label for="edit-item-price">Harga Sewa per Hari (Rp)</label>
+                        <input id="edit-item-price" class="input" type="number" required />
+
                         <label for="edit-item-category">Kategori</label>
                         <select id="edit-item-category" class="select">
                             <option value="Kamera">Kamera</option>
                             <option value="Motor">Motor</option>
                         </select>
+
+                        <div id="edit-kamera-fields" style="display: grid; gap: 16px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa;">
+                            <label for="edit-item-megapixel">Megapixel (MP)</label>
+                            <input id="edit-item-megapixel" class="input" type="number" step="0.1" />
+                            <label for="edit-item-resolusi">Resolusi Video</label>
+                            <input id="edit-item-resolusi" class="input" type="text" />
+                        </div>
+
+                        <div id="edit-motor-fields" style="display: none; gap: 16px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: #fafafa;">
+                            <label for="edit-item-cc">Kapasitas Mesin (CC)</label>
+                            <input id="edit-item-cc" class="input" type="number" />
+                            <label for="edit-item-tipe">Tipe Motor</label>
+                            <input id="edit-item-tipe" class="input" type="text" />
+                        </div>
 
                         <label for="edit-item-status">Status Barang</label>
                         <select id="edit-item-status" class="select">
@@ -131,6 +172,20 @@ async function loadItems() {
     }
 }
 
+function toggleCategoryFields(type, category) {
+    const kameraFields = document.getElementById(type === 'add' ? 'kamera-fields' : 'edit-kamera-fields');
+    const motorFields = document.getElementById(type === 'add' ? 'motor-fields' : 'edit-motor-fields');
+    if (category === 'Kamera') {
+        kameraFields.style.display = 'grid';
+        motorFields.style.display = 'none';
+    } else {
+        kameraFields.style.display = 'none';
+        motorFields.style.display = 'grid';
+    }
+}
+document.getElementById('item-category').addEventListener('change', e => toggleCategoryFields('add', e.target.value));
+document.getElementById('edit-item-category').addEventListener('change', e => toggleCategoryFields('edit', e.target.value));
+
 function renderItems() {
     const {category, status, sort, search} = getCurrentFilters();
     const list = document.getElementById('items');
@@ -159,11 +214,16 @@ function renderItems() {
         const card = document.createElement('div');
         card.className = 'item';
         const imageSrc = item.image_data || item.image_url || 'https://via.placeholder.com/400x300?text=Barang';
+        const specificInfo = item.category === 'Motor' 
+            ? `CC: ${item.cc || '-'} &middot; Tipe: ${item.tipe || '-'}`
+            : `MP: ${item.megapixel || '-'} &middot; Res: ${item.resolusi || '-'}`;
+        
         card.innerHTML = `
             <img src="${imageSrc}" alt="${item.name}" />
             <h3>${item.name}</h3>
-            <p>Kategori: ${item.category}</p>
-            <p>Status: ${item.status}</p>
+            <p><strong>Merk:</strong> ${item.merk || '-'}</p>
+            <p><strong>Harga:</strong> Rp${(item.price || 0).toLocaleString('id-ID')}</p>
+            <p>${specificInfo}</p>
             <div class="item-actions">
                 <span class="status-label ${item.status === 'Tersedia' ? 'status-available' : 'status-borrowed'}">${item.status}</span>
                 <button type="button" class="btn btn-secondary" data-action="edit" data-id="${item.id}">Edit</button>
@@ -199,11 +259,27 @@ async function addItem(event) {
     const title = document.getElementById('item-name').value.trim();
     const category = document.getElementById('item-category').value;
     const status = document.getElementById('item-status').value;
+    const price = document.getElementById('item-price').value;
+    const merk = document.getElementById('item-merk').value;
+    const cc = document.getElementById('item-cc').value;
+    const tipe = document.getElementById('item-tipe').value;
+    const megapixel = document.getElementById('item-megapixel').value;
+    const resolusi = document.getElementById('item-resolusi').value;
     const imageInput = document.getElementById('item-photo');
     const imageFile = imageInput.files[0];
     if (!title) return;
     try {
-        const payload = {name: title, category, status, price: 0};
+        const payload = {
+            name: title, 
+            merk,
+            price,
+            category, 
+            status,
+            cc,
+            tipe,
+            megapixel,
+            resolusi
+        };
         if (imageFile) {
             payload.image_data = await readImageFile(imageFile);
         }
@@ -248,7 +324,13 @@ const editModal = document.getElementById('edit-modal');
 const editDialog = editModal.querySelector('.modal');
 const editForm = document.getElementById('edit-item-form');
 const editNameInput = document.getElementById('edit-item-name');
+const editMerkInput = document.getElementById('edit-item-merk');
+const editPriceInput = document.getElementById('edit-item-price');
 const editCategoryInput = document.getElementById('edit-item-category');
+const editCcInput = document.getElementById('edit-item-cc');
+const editTipeInput = document.getElementById('edit-item-tipe');
+const editMegapixelInput = document.getElementById('edit-item-megapixel');
+const editResolusiInput = document.getElementById('edit-item-resolusi');
 const editStatusInput = document.getElementById('edit-item-status');
 const editPhotoInput = document.getElementById('edit-item-photo');
 const closeEditButton = document.getElementById('close-edit-modal');
@@ -258,9 +340,16 @@ function openEditModal(id) {
     if (!item) return;
     editingItemId = id;
     editNameInput.value = item.name;
+    editMerkInput.value = item.merk || '';
+    editPriceInput.value = item.price || 0;
     editCategoryInput.value = item.category;
+    editCcInput.value = item.cc || '';
+    editTipeInput.value = item.tipe || '';
+    editMegapixelInput.value = item.megapixel || '';
+    editResolusiInput.value = item.resolusi || '';
     editStatusInput.value = item.status;
     editPhotoInput.value = '';
+    toggleCategoryFields('edit', item.category);
     editModal.classList.add('active');
     editDialog.classList.add('active');
     editModal.setAttribute('aria-hidden', 'false');
@@ -287,9 +376,25 @@ editForm.addEventListener('submit', async event => {
     const title = editNameInput.value.trim();
     const category = editCategoryInput.value;
     const status = editStatusInput.value;
+    const price = editPriceInput.value;
+    const merk = editMerkInput.value;
+    const cc = editCcInput.value;
+    const tipe = editTipeInput.value;
+    const megapixel = editMegapixelInput.value;
+    const resolusi = editResolusiInput.value;
     const imageFile = editPhotoInput.files[0];
     try {
-        const payload = {name: title, category, status, price: 0};
+        const payload = {
+            name: title, 
+            merk,
+            price,
+            category, 
+            status,
+            cc,
+            tipe,
+            megapixel,
+            resolusi
+        };
         if (imageFile) {
             payload.image_data = await readImageFile(imageFile);
         }

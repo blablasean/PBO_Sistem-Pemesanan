@@ -1,5 +1,7 @@
 package com.example.backend;
 
+import java.util.Map;
+
 public class Motor extends Barang {
     private final int cc;
     private final String tipe;
@@ -31,6 +33,14 @@ public class Motor extends Barang {
     @Override
     public String getCategory() {
         return "Motor";
+    }
+
+    @Override
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = super.toMap();
+        map.put("cc", cc);
+        map.put("tipe", tipe);
+        return map;
     }
 
     @Override

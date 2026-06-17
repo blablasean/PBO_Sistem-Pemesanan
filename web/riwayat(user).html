@@ -10,8 +10,11 @@
     <main class="page-wrapper">
         <article class="page-card form-card" role="main" aria-labelledby="history-title">
             <header>
-                <h1 id="history-title" class="page-title">Riwayat Pemesanan</h1>
-                <p class="lead">Lihat riwayat peminjaman atau pemesanan barang Anda.</p>
+                <div class="header-info">
+                    <h1 id="history-title" class="page-title">Riwayat Pemesanan</h1>
+                    <p class="lead">Lihat riwayat peminjaman atau pemesanan barang Anda.</p>
+                </div>
+                <button type="button" class="btn btn-danger" id="logout-button" style="margin-top: 8px;">Logout</button>
             </header>
             <div class="controls" style="margin-bottom: 24px;">
                 <input type="search" id="q" class="input" placeholder="Cari..." />
@@ -25,7 +28,6 @@
                     <option value="kamera">Kamera</option>
                     <option value="motor">Motor</option>
                 </select>
-                <button type="button" class="btn btn-danger" id="logout-button">Logout</button>
             </div>
             <div class="items" id="list">
                 <div class="empty-state">Memuat riwayat...</div>

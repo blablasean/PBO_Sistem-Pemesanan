@@ -10,8 +10,11 @@
     <main class="page-wrapper">
         <article class="page-card" role="main" aria-labelledby="page-title">
             <header>
-                <h1 id="page-title" class="page-title">Peminjaman Barang</h1>
-                <p class="lead">Pilih barang yang ingin dipinjam dan ajukan permintaan secara cepat.</p>
+                <div class="header-info">
+                    <h1 id="page-title" class="page-title">Peminjaman Barang</h1>
+                    <p class="lead">Pilih barang yang ingin dipinjam dan ajukan permintaan secara cepat.</p>
+                </div>
+                <button type="button" id="logout-button" class="btn btn-danger" style="margin-top: 8px;">Logout</button>
             </header>
             <div class="page-grid">
                 <aside class="panel">
@@ -41,8 +44,7 @@
                         <option value="available">Hanya Tersedia</option>
                         <option value="borrowed">Hanya Dipinjam</option>
                     </select>
-                    <button type="button" id="show-history-button" class="btn btn-secondary">Lihat Riwayat</button>
-                    <button type="button" id="logout-button" class="btn btn-danger">Logout</button>
+                    <button type="button" id="show-history-button" class="btn btn-primary">Lihat Riwayat</button>
                 </div>
                 <div class="items" id="items"></div>
 
@@ -109,11 +111,16 @@
                                 const card = document.createElement('div');
                                 card.className = 'item';
                                 const imageSrc = item.image_data || item.image_url || 'https://via.placeholder.com/400x300?text=Barang';
+                                const specificInfo = item.category === 'Motor' 
+                                    ? `CC: ${item.cc || '-'} &middot; Tipe: ${item.tipe || '-'}`
+                                    : `MP: ${item.megapixel || '-'} &middot; Res: ${item.resolusi || '-'}`;
+
                                 card.innerHTML = `
                                     <img src="${imageSrc}" alt="${item.name}" />
                                     <h3>${item.name}</h3>
-                                    <p>Kategori: ${item.category}</p>
-                                    <p>Status: ${item.status}</p>
+                                    <p><strong>Merk:</strong> ${item.merk || '-'}</p>
+                                    <p><strong>Harga:</strong> Rp${(item.price || 0).toLocaleString('id-ID')} / hari</p>
+                                    <p>${specificInfo}</p>
                                     <div class="item-actions">
                                         <button type="button" class="btn btn-primary" style="width: 100%;" ${item.status !== 'Tersedia' ? 'disabled' : ''} data-id="${item.id}">
                                             ${item.status === 'Tersedia' ? 'Ajukan Peminjaman' : 'Tidak Tersedia'}

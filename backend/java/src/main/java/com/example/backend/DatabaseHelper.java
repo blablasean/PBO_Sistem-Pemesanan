@@ -23,11 +23,16 @@ public class DatabaseHelper {
     public void initSchema() throws SQLException {
         try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS users (id VARCHAR PRIMARY KEY, name VARCHAR, email VARCHAR, role VARCHAR, password VARCHAR)");
-            statement.execute("CREATE TABLE IF NOT EXISTS barang (id VARCHAR PRIMARY KEY, name VARCHAR, status VARCHAR, category VARCHAR, price DOUBLE, image_url VARCHAR, image_data CLOB)");
+            statement.execute("CREATE TABLE IF NOT EXISTS barang (id VARCHAR PRIMARY KEY, name VARCHAR, merk VARCHAR, status VARCHAR, category VARCHAR, price DOUBLE, image_url VARCHAR, image_data CLOB, cc INT, tipe VARCHAR, megapixel DOUBLE, resolusi VARCHAR)");
             statement.execute("CREATE TABLE IF NOT EXISTS transaksi (id VARCHAR PRIMARY KEY, user_id VARCHAR, barang_id VARCHAR, borrow_date DATE, return_date DATE, status VARCHAR, quantity INT DEFAULT 1, note VARCHAR(1024), total_cost DOUBLE, FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (barang_id) REFERENCES barang(id))");
             ensureColumn("transaksi", "quantity INT DEFAULT 1");
             ensureColumn("transaksi", "note VARCHAR(1024)");
             ensureColumn("barang", "image_data CLOB");
+            ensureColumn("barang", "merk VARCHAR");
+            ensureColumn("barang", "cc INT DEFAULT 0");
+            ensureColumn("barang", "tipe VARCHAR");
+            ensureColumn("barang", "megapixel DOUBLE DEFAULT 0.0");
+            ensureColumn("barang", "resolusi VARCHAR");
         }
     }
 
@@ -52,16 +57,21 @@ public class DatabaseHelper {
         }
     }
 
-    public void insertBarang(String id, String name, String status, String category, double price, String imageUrl, String imageData) throws SQLException {
-        String sql = "MERGE INTO barang (id, name, status, category, price, image_url, image_data) KEY(id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    public void insertBarang(String id, String name, String merk, String status, String category, double price, String imageUrl, String imageData, int cc, String tipe, double megapixel, String resolusi) throws SQLException {
+        String sql = "MERGE INTO barang (id, name, merk, status, category, price, image_url, image_data, cc, tipe, megapixel, resolusi) KEY(id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, id);
             statement.setString(2, name);
-            statement.setString(3, status);
-            statement.setString(4, category);
-            statement.setDouble(5, price);
-            statement.setString(6, imageUrl);
-            statement.setString(7, imageData);
+            statement.setString(3, merk);
+            statement.setString(4, status);
+            statement.setString(5, category);
+            statement.setDouble(6, price);
+            statement.setString(7, imageUrl);
+            statement.setString(8, imageData);
+            statement.setInt(9, cc);
+            statement.setString(10, tipe);
+            statement.setDouble(11, megapixel);
+            statement.setString(12, resolusi);
             statement.executeUpdate();
         }
     }
@@ -130,58 +140,88 @@ public class DatabaseHelper {
 
     public List<Map<String, Object>> getAllBarang() throws SQLException {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT id, name, status, category, price, image_url, image_data FROM barang";
+        String sql = "SELECT id, name, merk, status, category, price, image_url, image_data, cc, tipe, megapixel, resolusi FROM barang";
         try (Connection connection = getConnection(); Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(sql)) {
             while (resultSet.next()) {
-                Map<String, Object> row = new HashMap<>();
-                row.put("id", resultSet.getString("id"));
-                row.put("name", resultSet.getString("name"));
-                row.put("status", resultSet.getString("status"));
-                row.put("category", resultSet.getString("category"));
-                row.put("price", resultSet.getDouble("price"));
-                String imageData = resultSet.getString("image_data");
+                String id = resultSet.getString("id");
+                String name = resultSet.getString("name");
+                String merk = resultSet.getString("merk");
+                String status = resultSet.getString("status");
+                String category = resultSet.getString("category");
+                double price = resultSet.getDouble("price");
                 String imageUrl = resultSet.getString("image_url");
-                row.put("image_url", imageData != null && !imageData.isBlank() ? imageData : imageUrl);
-                row.put("image_data", imageData);
-                list.add(row);
+                String imageData = resultSet.getString("image_data");
+                int cc = resultSet.getInt("cc");
+                String tipe = resultSet.getString("tipe");
+                double megapixel = resultSet.getDouble("megapixel");
+                String resolusi = resultSet.getString("resolusi");
+
+                Barang barang;
+                if ("Motor".equalsIgnoreCase(category)) {
+                    barang = new Motor(id, name, merk, price, status, cc, tipe);
+                } else {
+                    barang = new Kamera(id, name, merk, price, status, megapixel, resolusi);
+                }
+                barang.setStatusPeminjaman(status);
+                barang.setImageUrl(imageUrl);
+                barang.setImageData(imageData);
+
+                list.add(barang.toMap());
             }
         }
         return list;
     }
 
     public Map<String, Object> getBarangById(String id) throws SQLException {
-        String sql = "SELECT id, name, status, category, price, image_url, image_data FROM barang WHERE id = ?";
+        String sql = "SELECT id, name, merk, status, category, price, image_url, image_data, cc, tipe, megapixel, resolusi FROM barang WHERE id = ?";
         try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    Map<String, Object> row = new HashMap<>();
-                    row.put("id", resultSet.getString("id"));
-                    row.put("name", resultSet.getString("name"));
-                    row.put("status", resultSet.getString("status"));
-                    row.put("category", resultSet.getString("category"));
-                    row.put("price", resultSet.getDouble("price"));
-                    String imageData = resultSet.getString("image_data");
+                    String name = resultSet.getString("name");
+                    String merk = resultSet.getString("merk");
+                    String status = resultSet.getString("status");
+                    String category = resultSet.getString("category");
+                    double price = resultSet.getDouble("price");
                     String imageUrl = resultSet.getString("image_url");
-                    row.put("image_url", imageData != null && !imageData.isBlank() ? imageData : imageUrl);
-                    row.put("image_data", imageData);
-                    return row;
+                    String imageData = resultSet.getString("image_data");
+                    int cc = resultSet.getInt("cc");
+                    String tipe = resultSet.getString("tipe");
+                    double megapixel = resultSet.getDouble("megapixel");
+                    String resolusi = resultSet.getString("resolusi");
+
+                    Barang barang;
+                    if ("Motor".equalsIgnoreCase(category)) {
+                        barang = new Motor(id, name, merk, price, status, cc, tipe);
+                    } else {
+                        barang = new Kamera(id, name, merk, price, status, megapixel, resolusi);
+                    }
+                    barang.setStatusPeminjaman(status);
+                    barang.setImageUrl(imageUrl);
+                    barang.setImageData(imageData);
+
+                    return barang.toMap();
                 }
             }
         }
         return null;
     }
 
-    public void updateBarang(String id, String name, String status, String category, double price, String imageUrl, String imageData) throws SQLException {
-        String sql = "UPDATE barang SET name = ?, status = ?, category = ?, price = ?, image_url = ?, image_data = ? WHERE id = ?";
+    public void updateBarang(String id, String name, String merk, String status, String category, double price, String imageUrl, String imageData, int cc, String tipe, double megapixel, String resolusi) throws SQLException {
+        String sql = "UPDATE barang SET name = ?, merk = ?, status = ?, category = ?, price = ?, image_url = ?, image_data = ?, cc = ?, tipe = ?, megapixel = ?, resolusi = ? WHERE id = ?";
         try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, name);
-            statement.setString(2, status);
-            statement.setString(3, category);
-            statement.setDouble(4, price);
-            statement.setString(5, imageUrl);
-            statement.setString(6, imageData);
-            statement.setString(7, id);
+            statement.setString(2, merk);
+            statement.setString(3, status);
+            statement.setString(4, category);
+            statement.setDouble(5, price);
+            statement.setString(6, imageUrl);
+            statement.setString(7, imageData);
+            statement.setInt(8, cc);
+            statement.setString(9, tipe);
+            statement.setDouble(10, megapixel);
+            statement.setString(11, resolusi);
+            statement.setString(12, id);
             statement.executeUpdate();
         }
     }
@@ -230,7 +270,7 @@ public class DatabaseHelper {
 
     public List<Map<String, Object>> getAllTransaksi() throws SQLException {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT t.id, t.user_id, u.name AS user_name, t.barang_id, b.name AS barang_name, b.image_url, t.borrow_date, t.return_date, t.status, t.total_cost, t.quantity, t.note " +
+        String sql = "SELECT t.id, t.user_id, u.name AS user_name, t.barang_id, b.name AS barang_name, b.image_url, b.image_data, t.borrow_date, t.return_date, t.status, t.total_cost, t.quantity, t.note " +
                 "FROM transaksi t " +
                 "LEFT JOIN users u ON u.id = t.user_id " +
                 "LEFT JOIN barang b ON b.id = t.barang_id " +
@@ -244,6 +284,7 @@ public class DatabaseHelper {
                 row.put("barang_id", resultSet.getString("barang_id"));
                 row.put("barang_name", resultSet.getString("barang_name"));
                 row.put("image_url", resultSet.getString("image_url"));
+                row.put("image_data", resultSet.getString("image_data"));
                 row.put("borrow_date", resultSet.getDate("borrow_date") != null ? resultSet.getDate("borrow_date").toString() : null);
                 row.put("return_date", resultSet.getDate("return_date") != null ? resultSet.getDate("return_date").toString() : null);
                 row.put("status", resultSet.getString("status"));

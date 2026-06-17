@@ -10,8 +10,10 @@
     <main class="page-wrapper">
         <article class="page-card form-card" role="main" aria-labelledby="register-title">
             <header>
-                <h1 id="register-title" class="page-title">Buat Akun Baru</h1>
-                <p class="lead">Isi data akun untuk mulai menggunakan sistem peminjaman barang.</p>
+                <div class="header-info">
+                    <h1 id="register-title" class="page-title">Buat Akun Baru</h1>
+                    <p class="lead">Isi data akun untuk mulai menggunakan sistem peminjaman barang.</p>
+                </div>
             </header>
             <form id="register-form" class="page-grid">
                 <div class="form-group">
@@ -24,11 +26,17 @@
                 </div>
                 <div class="form-group">
                     <label for="register-password">Kata Sandi</label>
-                    <input id="register-password" name="password" type="password" class="input" autocomplete="new-password" placeholder="••••••••" required />
+                    <div style="position: relative;">
+                        <input id="register-password" name="password" type="password" class="input" autocomplete="new-password" placeholder="••••••••" style="padding-right: 40px;" required />
+                        <button type="button" id="toggle-register-password" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.25rem; cursor: pointer; padding: 0;">👁️</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="confirm-password">Ulangi Kata Sandi</label>
-                    <input id="confirm-password" name="confirmPassword" type="password" class="input" autocomplete="new-password" placeholder="••••••••" required />
+                    <div style="position: relative;">
+                        <input id="confirm-password" name="confirmPassword" type="password" class="input" autocomplete="new-password" placeholder="••••••••" style="padding-right: 40px;" required />
+                        <button type="button" id="toggle-confirm-password" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.25rem; cursor: pointer; padding: 0;">👁️</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">Daftar Akun</button>
@@ -39,6 +47,22 @@
     </main>
 
     <script>
+        const toggleRegPassword = document.getElementById('toggle-register-password');
+        const regPasswordInput = document.getElementById('register-password');
+        toggleRegPassword.addEventListener('click', function () {
+            const isPassword = regPasswordInput.getAttribute('type') === 'password';
+            regPasswordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            this.textContent = isPassword ? '🙈' : '👁️';
+        });
+
+        const toggleConfPassword = document.getElementById('toggle-confirm-password');
+        const confPasswordInput = document.getElementById('confirm-password');
+        toggleConfPassword.addEventListener('click', function () {
+            const isPassword = confPasswordInput.getAttribute('type') === 'password';
+            confPasswordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            this.textContent = isPassword ? '🙈' : '👁️';
+        });
+
         document.getElementById('register-form').addEventListener('submit', async function (event) {
             event.preventDefault();
             const name = document.getElementById('name').value.trim();

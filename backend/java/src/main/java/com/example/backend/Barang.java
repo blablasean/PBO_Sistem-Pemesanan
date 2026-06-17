@@ -1,11 +1,16 @@
 package com.example.backend;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class Barang implements Printable {
     private final String idBarang;
     private final String namaBarang;
     private final String merk;
     private final double hargaSewa;
     private String statusPeminjaman;
+    private String imageUrl;
+    private String imageData;
 
     public Barang(String idBarang, String namaBarang, String merk, double hargaSewa, String statusPeminjaman) {
         this.idBarang = idBarang;
@@ -51,7 +56,36 @@ public abstract class Barang implements Printable {
         return hargaSewa;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getImageData() {
+        return imageData;
+    }
+
+    public void setImageData(String imageData) {
+        this.imageData = imageData;
+    }
+
     public abstract String getCategory();
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", idBarang);
+        map.put("name", namaBarang);
+        map.put("merk", merk);
+        map.put("category", getCategory());
+        map.put("status", statusPeminjaman);
+        map.put("price", hargaSewa);
+        map.put("image_url", imageData != null && !imageData.isBlank() ? imageData : imageUrl);
+        map.put("image_data", imageData);
+        return map;
+    }
 
     @Override
     public String printInfo() {

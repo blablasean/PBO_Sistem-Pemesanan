@@ -51,7 +51,15 @@ button {
     padding: 36px;
 }
 .page-card > header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
     margin-bottom: 24px;
+}
+.header-info {
+    flex: 1;
 }
 @media (max-width: 880px) {
     .page-card {
@@ -164,13 +172,8 @@ label {
 }
 .page-grid {
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 1fr;
     gap: 24px;
-}
-@media (max-width: 1120px) {
-    .page-grid {
-        grid-template-columns: 1fr;
-    }
 }
 .panel,
 .sidebar,

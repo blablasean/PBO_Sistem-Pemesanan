@@ -48,9 +48,14 @@ public class App {
             db.insertUser("u2", "Admin Toko", "admin@toko.com", "Admin", "admin123");
             db.insertUser("u3", "Admin Telkom University", "admin@telkomuniversity.ac.id", "Admin", "123456");
             
-            // Barang ini hanya akan dimasukkan sekali saat database baru dibuat
-            db.insertBarang("b1", "Kamera Sony A7III", "Tersedia", "Kamera", 350000, "https://via.placeholder.com/400x300?text=Kamera", null);
-            db.insertBarang("b2", "Yamaha NMAX 155", "Tersedia", "Motor", 150000, "https://via.placeholder.com/400x300?text=Motor", null);
+            Kamera kamera = new Kamera("b1", "Kamera Sony A7III", "Sony", 350000, "Tersedia", 24.2, "4K");
+            kamera.setImageUrl("https://via.placeholder.com/400x300?text=Kamera");
+            
+            Motor motor = new Motor("b2", "Yamaha NMAX 155", "Yamaha", 150000, "Tersedia", 155, "Matic");
+            motor.setImageUrl("https://via.placeholder.com/400x300?text=Motor");
+
+            db.insertBarang(kamera.getId(), kamera.getNama(), kamera.getMerk(), kamera.getStatusPeminjaman(), kamera.getCategory(), kamera.getHarga(), kamera.getImageUrl(), kamera.getImageData(), 0, null, kamera.getMegapixel(), kamera.getResolusi());
+            db.insertBarang(motor.getId(), motor.getNama(), motor.getMerk(), motor.getStatusPeminjaman(), motor.getCategory(), motor.getHarga(), motor.getImageUrl(), motor.getImageData(), motor.getCc(), motor.getTipe(), 0.0, null);
         }
     }
 
@@ -153,14 +158,35 @@ public class App {
                 String imageUrl = request.get("image_url");
                 String imageData = request.get("image_data");
                 double price = request.getOrDefault("price", "0").isBlank() ? 0 : Double.parseDouble(request.get("price"));
+                String merk = request.getOrDefault("merk", "Unknown");
+                int cc = request.get("cc") != null && !request.get("cc").isBlank() ? Integer.parseInt(request.get("cc")) : 0;
+                String tipe = request.getOrDefault("tipe", "Standard");
+                double megapixel = request.get("megapixel") != null && !request.get("megapixel").isBlank() ? Double.parseDouble(request.get("megapixel")) : 0.0;
+                String resolusi = request.getOrDefault("resolusi", "Unknown");
                 if (name == null || category == null || status == null) {
                     sendJson(exchange, 400, Map.of("success", false, "message", "Nama, kategori, dan status barang wajib diisi."));
                     return;
                 }
                 String itemId = "b" + UUID.randomUUID().toString().replaceAll("[^0-9]", "").substring(0, 8);
-                db.insertBarang(itemId, name, status, category, price,
-                        imageUrl != null && !imageUrl.isBlank() ? imageUrl : "https://via.placeholder.com/400x300?text=Barang+Baru",
-                        imageData != null && !imageData.isBlank() ? imageData : null);
+                
+                Barang barangBaru;
+                if ("Motor".equalsIgnoreCase(category)) {
+                    barangBaru = new Motor(itemId, name, merk, price, status, cc, tipe);
+                } else if ("Kamera".equalsIgnoreCase(category)) {
+                    barangBaru = new Kamera(itemId, name, merk, price, status, megapixel, resolusi);
+                } else {
+                    sendJson(exchange, 400, Map.of("success", false, "message", "Kategori harus Motor atau Kamera."));
+                    return;
+                }
+                barangBaru.setStatusPeminjaman(status);
+                barangBaru.setImageUrl(imageUrl != null && !imageUrl.isBlank() ? imageUrl : "https://via.placeholder.com/400x300?text=" + barangBaru.getCategory());
+                barangBaru.setImageData(imageData != null && !imageData.isBlank() ? imageData : null);
+
+                db.insertBarang(barangBaru.getId(), barangBaru.getNama(), barangBaru.getMerk(), barangBaru.getStatusPeminjaman(), barangBaru.getCategory(), barangBaru.getHarga(), barangBaru.getImageUrl(), barangBaru.getImageData(), 
+                        "Motor".equalsIgnoreCase(category) ? ((Motor)barangBaru).getCc() : 0, 
+                        "Motor".equalsIgnoreCase(category) ? ((Motor)barangBaru).getTipe() : null, 
+                        "Kamera".equalsIgnoreCase(category) ? ((Kamera)barangBaru).getMegapixel() : 0.0, 
+                        "Kamera".equalsIgnoreCase(category) ? ((Kamera)barangBaru).getResolusi() : null);
                 sendJson(exchange, 201, Map.of("success", true, "id", itemId));
                 return;
             }
@@ -177,13 +203,31 @@ public class App {
                 String imageUrl = request.get("image_url");
                 String imageData = request.get("image_data");
                 double price = request.getOrDefault("price", existingBarang.get("price").toString()).isBlank() ? 0 : Double.parseDouble(request.getOrDefault("price", existingBarang.get("price").toString()));
+                String merk = request.getOrDefault("merk", existingBarang.get("merk") != null ? existingBarang.get("merk").toString() : "Unknown");
+                int cc = request.get("cc") != null && !request.get("cc").isBlank() ? Integer.parseInt(request.get("cc")) : (existingBarang.get("cc") != null ? Integer.parseInt(existingBarang.get("cc").toString()) : 0);
+                String tipe = request.getOrDefault("tipe", existingBarang.get("tipe") != null ? existingBarang.get("tipe").toString() : "Standard");
+                double megapixel = request.get("megapixel") != null && !request.get("megapixel").isBlank() ? Double.parseDouble(request.get("megapixel")) : (existingBarang.get("megapixel") != null ? Double.parseDouble(existingBarang.get("megapixel").toString()) : 0.0);
+                String resolusi = request.getOrDefault("resolusi", existingBarang.get("resolusi") != null ? existingBarang.get("resolusi").toString() : "Unknown");
                 if ((imageUrl == null || imageUrl.isBlank()) && (imageData == null || imageData.isBlank())) {
-                    imageUrl = existingBarang.get("image_url") != null ? existingBarang.get("image_url").toString() : "https://via.placeholder.com/400x300?text=Barang";
+                    imageUrl = existingBarang.get("image_url") != null ? existingBarang.get("image_url").toString() : "https://via.placeholder.com/400x300?text=" + category;
                     imageData = existingBarang.get("image_data") != null ? existingBarang.get("image_data").toString() : null;
                 }
-                db.updateBarang(id, name, status, category, price,
-                        imageUrl != null && !imageUrl.isBlank() ? imageUrl : "https://via.placeholder.com/400x300?text=Barang",
-                        imageData);
+
+                Barang barangEdit;
+                if ("Motor".equalsIgnoreCase(category)) {
+                    barangEdit = new Motor(id, name, merk, price, status, cc, tipe);
+                } else {
+                    barangEdit = new Kamera(id, name, merk, price, status, megapixel, resolusi);
+                }
+                barangEdit.setStatusPeminjaman(status);
+                barangEdit.setImageUrl(imageUrl);
+                barangEdit.setImageData(imageData);
+
+                db.updateBarang(barangEdit.getId(), barangEdit.getNama(), barangEdit.getMerk(), barangEdit.getStatusPeminjaman(), barangEdit.getCategory(), barangEdit.getHarga(), barangEdit.getImageUrl(), barangEdit.getImageData(),
+                        "Motor".equalsIgnoreCase(category) ? ((Motor)barangEdit).getCc() : 0, 
+                        "Motor".equalsIgnoreCase(category) ? ((Motor)barangEdit).getTipe() : null, 
+                        "Kamera".equalsIgnoreCase(category) ? ((Kamera)barangEdit).getMegapixel() : 0.0, 
+                        "Kamera".equalsIgnoreCase(category) ? ((Kamera)barangEdit).getResolusi() : null);
                 sendJson(exchange, 200, Map.of("success", true, "message", "Barang diperbarui."));
                 return;
             }
