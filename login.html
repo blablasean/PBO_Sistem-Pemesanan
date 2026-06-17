@@ -26,12 +26,14 @@
 	<div class="container">
 		<div class="card" role="main" aria-labelledby="login-title">
 			<div class="left">
+                <center>
 				<h1 id="login-title">Selamat Datang</h1>
-				<p class="lead">Masuk ke akun Anda</p>
-				<form id="login-form" onsubmit="event.preventDefault(); alert('Login submitted');">
+				<p class="lead">Silahkan login ke akun untuk melanjutkan</p>
+				</center>
+                <form id="login-form" onsubmit="event.preventDefault(); alert('Login submitted');">
 					<div class="form-group">
 						<label for="email">Email</label>
-						<input id="email" type="email" placeholder="email@contoh.com" required />
+						<input id="email" type="email" placeholder="email@gmail.com" required />
 					</div>
 					<div class="form-group">
 						<label for="password">Kata sandi</label>
@@ -40,11 +42,8 @@
 					<div class="form-group">
 						<button type="submit">Masuk</button>
 					</div>
-					<div class="small">Belum punya akun? <a href="#">Daftar</a></div>
+					<!-- <div class="small">Belum punya akun? <a href="#">Daftar</a></div> -->
 				</form>
-			</div>
-			<div class="right" aria-hidden="true">
-				<img class="img-placeholder" src="https://api.builder.io/api/v1/image/assets/TEMP/ed84e14c5d3012b1420a0e561a13d63974778f62?width=1388" alt="Ilustrasi Halaman Login" />
 			</div>
 		</div>
 	</div>
