@@ -1,4 +1,4 @@
-package com.example.backend;
+package com.example.backend.model;
 
 public abstract class User implements Printable {
     private final String id;
@@ -42,7 +42,10 @@ public abstract class User implements Printable {
     public void logout() {
         this.loggedIn = false;
     }
-
+    @Override
+    public String printInfo() {
+        return printDetails();
+    }
     @Override
     public String printDetails() {
         return String.format("%s[id=%s, nama=%s, email=%s, role=%s, loggedIn=%s]",

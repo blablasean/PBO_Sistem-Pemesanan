@@ -1,4 +1,4 @@
-package com.example.backend;
+package com.example.backend.model;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

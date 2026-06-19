@@ -96,6 +96,12 @@
             }
             const form = document.getElementById('borrow-form');
             const data = Object.fromEntries(new FormData(form).entries());
+            
+            if (new Date(data.tanggal_kembali) < new Date(data.tanggal_pinjam)) {
+                alert('Tanggal kembali tidak boleh lebih awal dari tanggal pinjam.');
+                return;
+            }
+
             const payload = {
                 userId: currentUser.id,
                 barang_id: data.barang,
@@ -137,6 +143,21 @@
             }
             showCurrentUser(currentUser);
             await loadBarangOptions();
+
+            const today = new Date().toISOString().split('T')[0];
+            const tanggalPinjam = document.getElementById('tanggal_pinjam');
+            const tanggalKembali = document.getElementById('tanggal_kembali');
+
+            tanggalPinjam.min = today;
+            tanggalKembali.min = today;
+
+            tanggalPinjam.addEventListener('change', () => {
+                tanggalKembali.min = tanggalPinjam.value;
+                if (tanggalKembali.value && tanggalKembali.value < tanggalPinjam.value) {
+                    tanggalKembali.value = tanggalPinjam.value;
+                }
+            });
+
             const selectedItemId = localStorage.getItem('selectedItemId');
             if (selectedItemId) {
                 document.getElementById('barang').value = selectedItemId;

@@ -1,1 +1,6 @@
 backend/oracleJdk-26/
+backend/java/target/
+*.class
+*.trace.db
+tools/
+sources.txt

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Riwayat Pemesanan</title>
+    <title>Riwayat Peminjaman</title>
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -11,7 +11,7 @@
         <article class="page-card form-card" role="main" aria-labelledby="history-title">
             <header>
                 <div class="header-info">
-                    <h1 id="history-title" class="page-title">Riwayat Pemesanan</h1>
+                    <h1 id="history-title" class="page-title">Riwayat Peminjaman</h1>
                     <p class="lead">Lihat riwayat peminjaman atau pemesanan barang Anda.</p>
                 </div>
                 <button type="button" class="btn btn-danger" id="logout-button" style="margin-top: 8px;">Logout</button>
@@ -20,8 +20,8 @@
                 <input type="search" id="q" class="input" placeholder="Cari..." />
                 <select id="filter-status" class="select" style="width: auto;">
                     <option value="all">Semua Status</option>
-                    <option value="completed">Selesai</option>
-                    <option value="pending">Dalam Proses</option>
+                    <option value="dipinjam">Dipinjam</option>
+                    <option value="lunas">Lunas / Selesai</option>
                 </select>
                 <select id="filter-type" class="select" style="width: auto;">
                     <option value="all">Semua Kategori</option>
@@ -68,10 +68,14 @@
             records.forEach(rec => {
                 const card = document.createElement('div');
                 card.className = 'item';
-                const statusClass = rec.status && rec.status.toLowerCase().includes('selesai') ? 'status-completed' : 'status-pending';
+                const currentStatus = (rec.status || 'Dipinjam').toLowerCase();
+                const statusClass = currentStatus.includes('lunas') || currentStatus.includes('selesai')
+                    ? 'status-completed'
+                    : 'status-pending';
                 card.innerHTML = `
                     <img src="${rec.image_data || rec.image_url || 'https://via.placeholder.com/400x300?text=Barang'}" alt="${rec.barang_name || 'Barang'}" />
                     <h3>${rec.barang_name || 'Barang'}</h3>
+                    <p>Kategori: ${rec.category || '-'}</p>
                     <p>Dipinjam: ${rec.borrow_date || '-'}</p>
                     <p>Dikembalikan: ${rec.return_date || 'Belum kembali'}</p>
                     <p>Jml: ${rec.quantity || 1} · Ket: ${rec.note || '-'}</p>
@@ -98,9 +102,8 @@
                 let visible = true;
                 if (term && !text.includes(term)) visible = false;
                 if (st !== 'all') {
-                    const isCompleted = it.querySelector('.status-pill').classList.contains('status-completed');
-                    if (st === 'completed' && !isCompleted) visible = false;
-                    if (st === 'pending' && isCompleted) visible = false;
+                    const text = it.innerText.toLowerCase();
+                    if (!text.includes(st)) visible = false;
                 }
                 if (ty !== 'all' && !text.includes(ty)) visible = false;
                 it.style.display = visible ? '' : 'none';
